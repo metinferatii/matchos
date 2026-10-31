@@ -63,3 +63,22 @@ StatsBomb → data/match.json (62 key events)
 Use **4s per event** (the control-room default). LLM time budgets scale with the tick: at 4s every line in the dress rehearsal was AI-written in all four languages. At 3s, a few lines per match fall back to canned text when OpenAI is slow. At 2s, most do. Use **Next goal** (G) to skip ahead rather than speeding up.
 
 Full rehearsal: `./scripts/rehearsal.sh` plays the whole final with four fan clients, a question, a purchase and an actor-server restart, and logs to `.logs/rehearsal/`.
+
+## Newsroom (branch `newsroom`)
+
+The agents work as a newsroom on Agent Relay's `#match` channel, with structured metadata (`to`, `kind`, `ref`, `data`) on every message:
+
+| Agent | Does |
+|---|---|
+| producer | Directs every event (importance, tone, who acts), reviews normal/high drafts and may reject once, hires translators, acts on crowd mood |
+| commentator | Drafts a line to the directive's tone, rewrites once if rejected |
+| translator, translator-xx | sq/es/ar together; hired translators (ja, fr, de, tr) join live as new relay participants |
+| merch ↔ club-ops | Negotiate each goal's flash offer against stock, max discount and bundles (Supabase `inventory`) |
+| stats | Prep notes, fan answers, quiet-spell nuggets from computed facts, explainers on request |
+| crowd | Mood notes per language from votes and questions |
+
+Each upgrade has a flag in `agents/.env`: `PRODUCER`, `HIRING`, `NEGOTIATION`, `INITIATIVE` (default on; `0` restores the original pipeline). Tuning: `STEP_MS` (800), `REJECT_EVERY` (3), `QUIET_TICKS` (4), `CROWD_MS` (30000), `OPENAI_FAST_MODEL` (gpt-4o-mini).
+
+Goals never wait on the producer, and every agent step that could delay commentary times out at ~800 ms and falls back. The roster, hired agents' feeds and stock live in the actor, so they survive a server restart; a restarted agents process re-hires from the roster.
+
+Full test: `./scripts/newsroom-rehearsal.sh` plays the final at 4s/event with fans in five languages, a buyer, questions, a Japanese fan joining, and both restarts, then scores it with `scripts/newsroom-check.ts`.
