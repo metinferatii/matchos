@@ -2,6 +2,7 @@
 // moment of the shared timeline so every surface stays in sync.
 import type { CSSProperties, ReactNode } from "react"
 import { OffthreadVideo, staticFile } from "remotion"
+import { RATE } from "./data"
 import { C, F, Label, Rise, Scene } from "../theme"
 import { CROPS, type Caption, type Layout, type Persona, SURFACES, type SurfaceId } from "./data"
 
@@ -14,7 +15,7 @@ function Clip({ id, startFrame, scale, crop }: { id: SurfaceId; startFrame: numb
     const r = crop ?? { x: 0, y: 0, w: s.w, h: s.h }
     return (
         <div style={{ width: r.w * scale, height: r.h * scale, overflow: "hidden", position: "relative", background: "#000" }}>
-            <OffthreadVideo src={staticFile(s.file)} startFrom={startFrame} muted
+            <OffthreadVideo src={staticFile(s.file)} startFrom={startFrame} playbackRate={RATE} muted
                 style={{ position: "absolute", left: -r.x * scale, top: -r.y * scale, width: s.w * scale, height: s.h * scale }} />
         </div>
     )
@@ -66,7 +67,7 @@ export const Chip = ({ p, style }: { p: Persona; style?: CSSProperties }) => (
     </div>
 )
 
-const CaptionText = ({ caption, at = 8, size = 52 }: { caption: Caption; at?: number; size?: number }) => (
+const CaptionText = ({ caption, at = 2, size = 52 }: { caption: Caption; at?: number; size?: number }) => (
     <>
         <Rise at={at} style={{ fontFamily: F.title, fontWeight: 800, fontSize: size, lineHeight: 1.1, letterSpacing: "-0.01em" }}>{caption.title}</Rise>
         {caption.sub && <Rise at={at + 14} style={{ marginTop: 22, fontSize: Math.max(30, size * 0.62), lineHeight: 1.4, color: C.muted }}>{caption.sub}</Rise>}
@@ -128,7 +129,7 @@ export function ShotView({ layout, caption, section, startFrame }: { layout: Lay
         const p = SURFACES[layout.who].persona!
         body = <SideBySide who={layout.who} startFrame={startFrame} text={<>
             <Rise at={0}><Chip p={p} /></Rise>
-            <div style={{ marginTop: 30 }}><CaptionText caption={caption} size={64} /></div>
+            <div style={{ marginTop: 30 }}><CaptionText caption={caption} size={88} /></div>
         </>} />
     } else if (layout.kind === "control") {
         const r = CROPS[layout.crop]
@@ -137,7 +138,7 @@ export function ShotView({ layout, caption, section, startFrame }: { layout: Lay
             <>
                 <Abs style={{ left: 120, top: 0, bottom: 0, width: 1920 - 120 - 260 - r.w * scale - 120, display: "flex", flexDirection: "column", justifyContent: "center" }}>
                     <Rise at={0}><Label color={C.accent} style={{ fontSize: 20 }}>Control room · Agent Relay</Label></Rise>
-                    <div style={{ marginTop: 30 }}><CaptionText caption={caption} size={60} /></div>
+                    <div style={{ marginTop: 30 }}><CaptionText caption={caption} size={84} /></div>
                 </Abs>
                 <Abs style={{ right: 260, top: 140 }}>
                     <Rise at={2} style={{ border: `2px solid ${C.line}`, borderRadius: 14, overflow: "hidden" }}><Clip id="control" startFrame={startFrame} scale={scale} crop={r} /></Rise>
@@ -169,13 +170,13 @@ export function ShotView({ layout, caption, section, startFrame }: { layout: Lay
         )
         body = pair ? (
             <>
-                <Abs style={{ left: 120, top: 0, bottom: 0, width: 760, display: "flex", flexDirection: "column", justifyContent: "center" }}><CaptionText caption={caption} size={64} /></Abs>
+                <Abs style={{ left: 120, top: 0, bottom: 0, width: 760, display: "flex", flexDirection: "column", justifyContent: "center" }}><CaptionText caption={caption} size={88} /></Abs>
                 <Abs style={{ right: 200, top }}>{devices}</Abs>
             </>
         ) : (
             <>
                 <Abs style={{ left: 0, right: 0, top, display: "flex", justifyContent: "center" }}>{devices}</Abs>
-                <Abs style={{ left: 120, right: 120, top: top + areaH + 40 }}><CaptionText caption={caption} size={46} /></Abs>
+                <Abs style={{ left: 120, right: 120, top: top + areaH + 40 }}><CaptionText caption={caption} size={72} /></Abs>
             </>
         )
     }

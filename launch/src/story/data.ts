@@ -40,25 +40,28 @@ export type Shot = {
     maxS: number
 }
 
-const MEET = "Meet the fans"
-const MATCH = "The match"
+const MATCH = "Live"
+
+/** Footage inside each shot plays this much faster than real time. */
+export const RATE = 1.6
+
+// The trailer cut: one idea per shot, 2.5-3 s each, captions of a few words.
+const shot = (beat: string, offsetS: number, seconds: number, layout: Layout, title: string): Shot =>
+    ({ beat, section: MATCH, offsetS, minS: seconds, maxS: seconds, layout, caption: { title } })
 
 export const SHOTS: Shot[] = [
-    { beat: "open", section: MEET, offsetS: -0.5, minS: 4, maxS: 4, layout: { kind: "meet", who: "arta", intro: "Opens the club app on her phone." }, caption: { title: "Her agent welcomes her, in Albanian." } },
-    { beat: "open", section: MEET, offsetS: -0.5, minS: 4, maxS: 4, layout: { kind: "meet", who: "diego", intro: "Opens the same club app." }, caption: { title: "His agent welcomes him, in Spanish." } },
-    { beat: "open", section: MEET, offsetS: -0.5, minS: 4, maxS: 4, layout: { kind: "meet", who: "sam", intro: "Opens the club's match page at his desk." }, caption: { title: "Same match, in English, from one script tag." } },
-    { beat: "picks", section: MATCH, offsetS: -1, minS: 5, maxS: 6, layout: { kind: "pair", who: ["arta", "diego"] }, caption: { title: "Arta picks Messi. Diego picks Di María.", sub: "Each pick goes to their own agent." } },
-    { beat: "goal-messi", section: MATCH, offsetS: -0.5, minS: 4, maxS: 5, layout: { kind: "row", who: ["arta", "diego", "sam"] }, caption: { title: "Messi scores. Every screen, every language.", sub: "Arta's agent: “You called it.” Diego's agent writes him a different line." } },
-    { beat: "goal-messi", section: MATCH, offsetS: 1.5, minS: 4, maxS: 5, layout: { kind: "close", who: "arta" }, caption: { title: "Arta picked Messi. Her agent remembers.", sub: "A personal line, then a personal offer." } },
-    { beat: "agents-negotiate", section: MATCH, offsetS: -0.5, minS: 5, maxS: 6, layout: { kind: "control", crop: "agents" }, caption: { title: "Her agent asks club-ops for an offer.", sub: "Merch checks stock. The agents agree a price, in the open." } },
-    { beat: "arta-buys", section: MATCH, offsetS: -1, minS: 4, maxS: 5, layout: { kind: "close", who: "arta" }, caption: { title: "Arta buys the shirt.", sub: "Her agent remembers that too." } },
-    { beat: "goal-dimaria", section: MATCH, offsetS: -0.5, minS: 4, maxS: 5, layout: { kind: "close", who: "diego" }, caption: { title: "Di María scores. Now Diego called it.", sub: "His agent kept his pick from the first minute." } },
-    { beat: "arta-leaves", section: MATCH, offsetS: -0.5, minS: 3, maxS: 4, layout: { kind: "close", who: "arta" }, caption: { title: "Arta closes the app.", sub: "Her agent keeps her place." } },
-    { beat: "kenji-joins", section: MATCH, offsetS: -0.5, minS: 5, maxS: 6, layout: { kind: "control", crop: "agents" }, caption: { title: "Kenji opens the app in Japanese.", sub: "Nobody covers Japanese, so the producer hires a translator agent, live." } },
-    { beat: "kenji-joins", section: MATCH, offsetS: 5, minS: 4, maxS: 5, layout: { kind: "meet", who: "kenji", intro: "Joins mid-match." }, caption: { title: "Seconds later, the match is in Japanese.", sub: "And Kenji has an agent of his own." } },
-    { beat: "arta-returns", section: MATCH, offsetS: -0.5, minS: 5, maxS: 6, layout: { kind: "close", who: "arta" }, caption: { title: "Arta comes back.", sub: "Her agent catches her up: “While you were away…”" } },
-    { beat: "kill", section: MATCH, offsetS: -0.5, minS: 4, maxS: 5, layout: { kind: "row", who: ["arta", "diego", "kenji", "sam"] }, caption: { title: "We kill the server mid-match.", sub: "Every fan's screen shows reconnecting." } },
-    { beat: "resume", section: MATCH, offsetS: -0.5, minS: 5, maxS: 6, layout: { kind: "row", who: ["arta", "diego", "kenji", "sam"] }, caption: { title: "It comes back where it left off.", sub: "Every fan's agent is its own durable actor. Nothing is lost." } },
+    shot("open", 0, 2.6, { kind: "row", who: ["arta", "diego", "sam"] }, "Three fans. Three languages."),
+    shot("picks", -0.5, 2.6, { kind: "pair", who: ["arta", "diego"] }, "Each picks a scorer."),
+    shot("goal-messi", -0.3, 2.8, { kind: "row", who: ["arta", "diego", "sam"] }, "Goal. Every screen at once."),
+    shot("goal-messi", 1.2, 2.8, { kind: "close", who: "arta" }, "“You called it.” Her agent."),
+    shot("agents-negotiate", -0.3, 3, { kind: "control", crop: "agents" }, "Her agent cuts her a deal."),
+    shot("arta-buys", -0.5, 2.4, { kind: "close", who: "arta" }, "Sold."),
+    shot("goal-dimaria", 0, 2.6, { kind: "close", who: "diego" }, "Diego called this one."),
+    shot("kenji-joins", 0, 3, { kind: "control", crop: "agents" }, "Japanese fan? Agent hired. Live."),
+    shot("kenji-joins", 5, 2.6, { kind: "close", who: "kenji" }, "Now in Japanese."),
+    shot("arta-returns", 0.5, 3, { kind: "close", who: "arta" }, "“While you were away…”"),
+    shot("kill", 0.5, 2.4, { kind: "row", who: ["arta", "diego", "kenji", "sam"] }, "We kill the server."),
+    shot("resume", 0, 2.8, { kind: "row", who: ["arta", "diego", "kenji", "sam"] }, "Nothing lost."),
 ]
 
 /** Shots with their clip start and length resolved from the timeline; shots whose beat is missing are dropped. */

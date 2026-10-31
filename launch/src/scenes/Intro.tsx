@@ -71,7 +71,7 @@ const TAG = `<script src="https://matchday.os/embed.js"
 /** The drop-in: the one line a club adds, typing itself out. */
 export function ScriptTag() {
     const frame = useCurrentFrame()
-    const typed = Math.floor(useProgress(18, 98) * TAG.length)
+    const typed = Math.floor(useProgress(4, 48) * TAG.length)
     const caret = frame % 30 < 16 ? C.accent : "transparent"
     return (
         <Scene>
@@ -81,10 +81,26 @@ export function ScriptTag() {
                     <span>{TAG.slice(0, typed)}</span>
                     <span style={{ display: "inline-block", width: 18, height: 40, marginLeft: 4, verticalAlign: "-6px", background: caret }} />
                 </Rise>
-                <Rise at={110} style={{ marginTop: 48, fontSize: 40, color: C.muted, lineHeight: 1.4 }}>
+                <Rise at={50} style={{ marginTop: 48, fontSize: 40, color: C.muted, lineHeight: 1.4 }}>
                     Or one React Native component in the club's app. Fans get live AI commentary in their language,
                     <span style={{ color: C.text }}> predictions, answers, and flash merch on every goal.</span>
                 </Rise>
+            </div>
+        </Scene>
+    )
+}
+
+/** Trailer hook: three hard beats of big type. */
+export function Hook() {
+    const frame = useCurrentFrame()
+    const lines: [number, string, string][] = [[0, "Every fan.", C.text], [30, "Their own AI agent.", C.accent], [66, "Live. In their language.", C.text]]
+    const shown = lines.filter(([at]) => frame >= at)
+    return (
+        <Scene fade={6} style={{ background: C.deep }}>
+            <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", justifyContent: "center", paddingLeft: 160, gap: 6 }}>
+                {shown.map(([at, text, color]) => (
+                    <Rise key={text} at={at} style={{ fontFamily: F.title, fontWeight: 900, fontSize: 132, lineHeight: 1.02, letterSpacing: "-0.02em", color }}>{text}</Rise>
+                ))}
             </div>
         </Scene>
     )
