@@ -63,6 +63,10 @@ export declare namespace actors {
                 Args: Parameters<Stub["getOrders"]>
                 Result: Awaited<ReturnType<Stub["getOrders"]>>
             }
+            ["getRoster"]: {
+                Args: Parameters<Stub["getRoster"]>
+                Result: Awaited<ReturnType<Stub["getRoster"]>>
+            }
             ["getState"]: {
                 Args: Parameters<Stub["getState"]>
                 Result: Awaited<ReturnType<Stub["getState"]>>
@@ -70,6 +74,10 @@ export declare namespace actors {
             ["getTimeline"]: {
                 Args: Parameters<Stub["getTimeline"]>
                 Result: Awaited<ReturnType<Stub["getTimeline"]>>
+            }
+            ["hireAgent"]: {
+                Args: Parameters<Stub["hireAgent"]>
+                Result: Awaited<ReturnType<Stub["hireAgent"]>>
             }
             ["jumpTo"]: {
                 Args: Parameters<Stub["jumpTo"]>
@@ -91,9 +99,21 @@ export declare namespace actors {
                 Args: Parameters<Stub["postCommentary"]>
                 Result: Awaited<ReturnType<Stub["postCommentary"]>>
             }
+            ["postExtraCommentary"]: {
+                Args: Parameters<Stub["postExtraCommentary"]>
+                Result: Awaited<ReturnType<Stub["postExtraCommentary"]>>
+            }
+            ["registerAgents"]: {
+                Args: Parameters<Stub["registerAgents"]>
+                Result: Awaited<ReturnType<Stub["registerAgents"]>>
+            }
             ["reset"]: {
                 Args: Parameters<Stub["reset"]>
                 Result: Awaited<ReturnType<Stub["reset"]>>
+            }
+            ["setAgentStatus"]: {
+                Args: Parameters<Stub["setAgentStatus"]>
+                Result: Awaited<ReturnType<Stub["setAgentStatus"]>>
             }
             ["setOffer"]: {
                 Args: Parameters<Stub["setOffer"]>
@@ -128,6 +148,10 @@ export declare namespace actors {
                 type Args = $MethodTypes["getOrders"]["Args"]
                 type Result = $MethodTypes["getOrders"]["Result"]
             }
+            namespace getRoster {
+                type Args = $MethodTypes["getRoster"]["Args"]
+                type Result = $MethodTypes["getRoster"]["Result"]
+            }
             namespace getState {
                 type Args = $MethodTypes["getState"]["Args"]
                 type Result = $MethodTypes["getState"]["Result"]
@@ -135,6 +159,10 @@ export declare namespace actors {
             namespace getTimeline {
                 type Args = $MethodTypes["getTimeline"]["Args"]
                 type Result = $MethodTypes["getTimeline"]["Result"]
+            }
+            namespace hireAgent {
+                type Args = $MethodTypes["hireAgent"]["Args"]
+                type Result = $MethodTypes["hireAgent"]["Result"]
             }
             namespace jumpTo {
                 type Args = $MethodTypes["jumpTo"]["Args"]
@@ -156,9 +184,21 @@ export declare namespace actors {
                 type Args = $MethodTypes["postCommentary"]["Args"]
                 type Result = $MethodTypes["postCommentary"]["Result"]
             }
+            namespace postExtraCommentary {
+                type Args = $MethodTypes["postExtraCommentary"]["Args"]
+                type Result = $MethodTypes["postExtraCommentary"]["Result"]
+            }
+            namespace registerAgents {
+                type Args = $MethodTypes["registerAgents"]["Args"]
+                type Result = $MethodTypes["registerAgents"]["Result"]
+            }
             namespace reset {
                 type Args = $MethodTypes["reset"]["Args"]
                 type Result = $MethodTypes["reset"]["Result"]
+            }
+            namespace setAgentStatus {
+                type Args = $MethodTypes["setAgentStatus"]["Args"]
+                type Result = $MethodTypes["setAgentStatus"]["Result"]
             }
             namespace setOffer {
                 type Args = $MethodTypes["setOffer"]["Args"]

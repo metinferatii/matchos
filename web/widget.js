@@ -4,7 +4,8 @@
 
   // ---------- Params ----------
   var P = new URLSearchParams(location.search);
-  var LANGS = ["en", "sq", "es", "ar"];
+  // en/sq/es/ar are covered by the base translator; ja/fr/de/tr by translators hired live.
+  var LANGS = ["en", "sq", "es", "ar", "ja", "fr", "de", "tr"];
   var lang = LANGS.indexOf(P.get("lang")) >= 0 ? P.get("lang") : "en";
   var match = P.get("match") || "wc22-final";
   var frameId = P.get("frame") || "";
@@ -70,6 +71,54 @@
       off: "خرج", pens: "ركلات الترجيح", pensMin: "ترجيح", pre: "قبل المباراة",
       reconnecting: "جارٍ إعادة الاتصال…", connecting: "جارٍ الاتصال…", powered: "بدعم من",
       waiting: "يبدأ التعليق مع صافرة البداية.", jersey: "قميص"
+    },
+    ja: {
+      teams: { Argentina: "アルゼンチン", France: "フランス" },
+      live: "ライブ", feedSub: "AI実況", predict: "次に得点するのは？", hint: "選手をタップして予想しよう。",
+      votes: function (n) { return n + "票"; }, noVotes: "まだ予想はありません",
+      ask: "質問", askPh: "この試合について質問する", youAsked: "あなたの質問", answer: "あなたへの回答",
+      thinking: "考え中…", goal: "ゴール", update: "お知らせ",
+      flash: "タイムセール", endsIn: "終了まで", buy: "今すぐ購入", buying: "注文中…", later: "あとで",
+      ordered: "注文を受け付けました。確認をお送りします。", expired: "このオファーは終了しました。",
+      off: "交代", pens: "PK戦", pensMin: "PK", pre: "試合前",
+      reconnecting: "再接続中…", connecting: "接続中…", powered: "Powered by",
+      waiting: "キックオフと同時に実況が始まります。", jersey: "ユニフォーム"
+    },
+    fr: {
+      teams: { Argentina: "Argentine", France: "France" },
+      live: "En direct", feedSub: "Commentaire IA", predict: "Qui marque le prochain ?", hint: "Touchez un joueur pour faire votre pronostic.",
+      votes: function (n) { return n === 1 ? "1 vote" : n + " votes"; }, noVotes: "Aucun pronostic",
+      ask: "Demander", askPh: "Posez une question sur ce match", youAsked: "Votre question", answer: "Réponse pour vous",
+      thinking: "Réflexion…", goal: "But", update: "Info",
+      flash: "Offre flash", endsIn: "Fin dans", buy: "Acheter", buying: "Commande…", later: "Plus tard",
+      ordered: "Commande reçue. La confirmation arrive.", expired: "Cette offre est terminée.",
+      off: "Remplacé", pens: "Tirs au but", pensMin: "TAB", pre: "Avant-match",
+      reconnecting: "Reconnexion…", connecting: "Connexion…", powered: "Propulsé par",
+      waiting: "Le commentaire commence au coup d'envoi.", jersey: "maillot"
+    },
+    de: {
+      teams: { Argentina: "Argentinien", France: "Frankreich" },
+      live: "Live", feedSub: "KI-Kommentar", predict: "Wer trifft als Nächstes?", hint: "Tippe auf einen Spieler für deinen Tipp.",
+      votes: function (n) { return n === 1 ? "1 Stimme" : n + " Stimmen"; }, noVotes: "Noch keine Tipps",
+      ask: "Fragen", askPh: "Frag etwas zu diesem Spiel", youAsked: "Deine Frage", answer: "Antwort für dich",
+      thinking: "Denke nach…", goal: "Tor", update: "Hinweis",
+      flash: "Blitzangebot", endsIn: "Endet in", buy: "Jetzt kaufen", buying: "Bestelle…", later: "Später",
+      ordered: "Bestellung erhalten. Die Bestätigung folgt.", expired: "Dieses Angebot ist abgelaufen.",
+      off: "Ausgewechselt", pens: "Elfmeterschießen", pensMin: "11m", pre: "Vor dem Spiel",
+      reconnecting: "Verbinde neu…", connecting: "Verbinde…", powered: "Bereitgestellt von",
+      waiting: "Der Kommentar beginnt mit dem Anpfiff.", jersey: "Trikot"
+    },
+    tr: {
+      teams: { Argentina: "Arjantin", France: "Fransa" },
+      live: "Canlı", feedSub: "Yapay zekâ anlatımı", predict: "Sıradaki golü kim atar?", hint: "Tahminin için bir oyuncuya dokun.",
+      votes: function (n) { return n + " oy"; }, noVotes: "Henüz tahmin yok",
+      ask: "Sor", askPh: "Bu maç hakkında bir şey sor", youAsked: "Sorun", answer: "Sana yanıt",
+      thinking: "Düşünüyor…", goal: "Gol", update: "Bilgi",
+      flash: "Flaş teklif", endsIn: "Bitişe", buy: "Hemen al", buying: "Sipariş veriliyor…", later: "Şimdi değil",
+      ordered: "Sipariş alındı. Onay yolda.", expired: "Bu teklif sona erdi.",
+      off: "Oyundan çıktı", pens: "Penaltılar", pensMin: "Pen.", pre: "Maç öncesi",
+      reconnecting: "Yeniden bağlanıyor…", connecting: "Bağlanıyor…", powered: "Altyapı:",
+      waiting: "Anlatım başlama düdüğüyle başlar.", jersey: "forma"
     }
   };
   var T = STR[lang];

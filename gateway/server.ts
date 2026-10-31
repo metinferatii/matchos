@@ -8,8 +8,8 @@
 import type { ServerWebSocket } from "bun"
 import { join, normalize } from "node:path"
 import { actors } from "./generated/index.js"
-import type { Lang } from "../shared/contract"
-import { LANGS } from "../shared/contract"
+import type { FanLang } from "../shared/contract"
+import { FAN_LANGS } from "../shared/contract"
 
 const PORT = Number(process.env.PORT ?? 8080)
 const WEB = join(import.meta.dir, "../web")
@@ -17,18 +17,18 @@ const DEFAULT_MATCH = "wc22-final"
 
 const ROOM_STATE = '{"type":"room_state"'
 
-type Conn = { match: string; userId: string; lang: Lang; upstream?: WebSocket; queue: string[] }
+type Conn = { match: string; userId: string; lang: FanLang; upstream?: WebSocket; queue: string[] }
 
 const cors = { "access-control-allow-origin": "*", "access-control-allow-headers": "content-type" }
 const room = (id: string) => actors.MatchRoom.get(id)
 
 function params(url: URL) {
-    const lang = url.searchParams.get("lang") as Lang
+    const lang = url.searchParams.get("lang") as FanLang
     return {
         // The RN SDK sends `matchId`; the web widget and /connect use `match`.
         match: url.searchParams.get("matchId") || url.searchParams.get("match") || DEFAULT_MATCH,
         userId: (url.searchParams.get("userId") || crypto.randomUUID()).slice(0, 64),
-        lang: LANGS.includes(lang) ? lang : "en",
+        lang: FAN_LANGS.includes(lang) ? lang : "en",
     }
 }
 

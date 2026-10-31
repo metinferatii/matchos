@@ -13,17 +13,28 @@ import type { Lang, MatchEvent, Offer } from "../shared/contract"
 import { templateLine } from "../shared/templates"
 import { EVENTS, MATCH_ID, MODEL, Member, RUN, STEP_MS, budget, describe, flags, goalsBy, isGoal, llm, room, supabase, tick } from "./core"
 import { actors } from "./generated/index.js"
+import { LANG_NAME, releaseHires, restoreHires, startHiring } from "./hiring"
 import { ruleDirective, startProducer, type Directive } from "./producer"
-
-const LANG_NAME: Record<string, string> = { en: "English", sq: "Albanian", es: "Spanish", ar: "Arabic", ja: "Japanese", fr: "French", de: "German", tr: "Turkish" }
 
 const names = ["ingest", "commentator", "translator", "stats", "merch", ...(flags.producer ? ["producer"] : [])]
 const members = Object.fromEntries(await Promise.all(names.map(async n => [n, await Member.join(n)] as const)))
 const { ingest, commentator, translator, stats, merch } = members
 console.log(`Newsroom online for ${MATCH_ID} (run ${RUN}, model ${MODEL}) flags ${JSON.stringify(flags)}`)
 
+const ROLES: Record<string, string> = {
+    ingest: "match data", producer: "editor", commentator: "commentary", translator: "translator (sq, es, ar)",
+    stats: "facts and answers", merch: "flash offers",
+}
+await room.registerAgents(names.map(n => ({ name: n, role: ROLES[n] ?? n })))
+
 const publishedLines: string[] = []
 if (flags.producer) startProducer(members.producer, publishedLines)
+// Hiring is the producer's decision, so it needs both flags; without it, those fans get English.
+const hiring = flags.producer && flags.hiring
+if (hiring) {
+    startHiring(members.producer)
+    await restoreHires()
+}
 
 /** The producer's directive for an event, or the rule-based default if it doesn't arrive in time. */
 async function directiveFor(m: Member, e: MatchEvent): Promise<Directive> {
@@ -47,6 +58,7 @@ commentator.on(async m => {
     // reach the translators by `deadline`, leaving them ~1.2s.
     const publishBy = Date.now() + tick.ms - 250
     const deadline = publishBy - 1250
+    await commentator.task(async () => {
     const d = await directiveFor(commentator, e)
     const context = `Match: Argentina vs France, 2022 World Cup final, Lusail.\nEvent: ${describe(e)}. ${e.detail}.\nTone: ${d.tone}.\nRecent lines:\n${publishedLines.slice(-8).join("\n") || "(none)"}`
     let line = (await llm(COMMENTATOR, context, { temperature: 0.9, timeoutMs: Math.min(budget(0.3), Math.max(400, deadline - Date.now() - 200)) }))?.replace(/^"|"$/g, "")
@@ -68,6 +80,7 @@ commentator.on(async m => {
     }
     publishedLines.push(line)
     await commentator.post("translators", line, { ref: e.id, data: { eventId: e.id, line, publishBy } })
+    })
 })
 
 // ---- translator: sq/es/ar, published together with the English line ----
@@ -76,12 +89,12 @@ translator.on(async m => {
     if (m.from !== "commentator" || m.data?.line === undefined) return
     const e = EVENTS[m.data.eventId]
     const en: string = m.data.line
-    const raw = await llm(
+    const raw = await translator.task(() => llm(
         "Translate live football commentary for fans. Return JSON {\"sq\":\"...\",\"es\":\"...\",\"ar\":\"...\"} with natural, energetic Albanian, Spanish and Arabic. " +
         "Keep player names as given (Latin script is fine in Arabic). Keep it as short as the original.",
         en,
         { json: true, timeoutMs: Math.max(400, (m.data.publishBy ?? Date.now() + budget(0.4)) - Date.now() - 60), temperature: 0.3 },
-    )
+    ))
     let out: Partial<Record<Lang, string>> = {}
     try { out = raw ? JSON.parse(raw) : {} } catch { /* fall back below */ }
     const lines = {
@@ -151,12 +164,12 @@ stats.on(async m => {
     const q = m.data.question as { userId: string; lang: string; text: string }
     const [state, timeline] = await Promise.all([room.getState(), room.getTimeline()])
     const facts = timeline.map(describe).join("\n")
-    const answer = (await llm(
+    const answer = (await stats.task(() => llm(
         `You answer football fans' questions during a live match, using ONLY the match data given. Answer in ${LANG_NAME[q.lang] ?? "English"}, in 1-2 short sentences. ` +
         "If the data doesn't contain the answer, say so briefly and give the current score. Never invent stats.",
         `Current: ${state.clock}, Argentina ${state.score.home}-${state.score.away} France${state.shootout ? ` (penalties ${state.shootout.home}-${state.shootout.away})` : ""}.\nEvents so far:\n${facts || "(not started)"}\n\nQuestion: ${q.text}`,
         { timeoutMs: 4000, temperature: 0.2 },
-    )) ?? `${state.clock}: Argentina ${state.score.home}-${state.score.away} France.`
+    ))) ?? `${state.clock}: Argentina ${state.score.home}-${state.score.away} France.`
     await room.postAnswer(q.userId, q.lang as Lang, answer)
     await stats.post("all", `Answered (${q.lang}): ${answer}`)
 })
@@ -179,6 +192,11 @@ async function onActorMessage(msg: any) {
     } else if (msg.type === "question") {
         const q = msg.question
         await ingest.post("stats", `Fan question (${q.lang}): "${q.text}"`, { ref: q.id.slice(0, 8), data: { question: q } })
+    } else if (msg.type === "language_needed" && hiring) {
+        const { lang, fans } = msg
+        await ingest.post("producer", `A fan joined in ${LANG_NAME[lang] ?? lang}. No translator covers ${lang}.`, { kind: "note", data: { languageNeeded: { lang, fans } } })
+    } else if (msg.type === "reset") {
+        releaseHires()
     } else if (msg.type === "order") {
         await ingest.post("merch", `Order from ${msg.order.userId}: ${msg.order.offer.title}`, { data: { order: msg.order } })
     }

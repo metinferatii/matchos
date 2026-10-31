@@ -183,6 +183,19 @@ export class Member {
         })
     }
 
+    /** Runs a piece of work with this member shown as "working" on the control-room roster. */
+    async task<T>(fn: () => Promise<T>): Promise<T> {
+        this.busy++
+        if (this.busy === 1) room.setAgentStatus(this.name, "working").catch(() => {})
+        try {
+            return await fn()
+        } finally {
+            this.busy--
+            if (this.busy === 0) room.setAgentStatus(this.name, "idle").catch(() => {})
+        }
+    }
+    private busy = 0
+
     /** Posts on #match and mirrors the line into the actor's agentLog for the control room. */
     async post(to: string, text: string, opts: { kind?: AgentKind; ref?: string | number; data?: unknown } = {}) {
         const ref = opts.ref === undefined ? undefined : String(opts.ref)

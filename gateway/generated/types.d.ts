@@ -20,6 +20,8 @@ interface $MatchRoomContract {
         commentedThrough: number
         orders: Order[]
         personal: Record<string, FeedItem[]>
+        roster: RosterEntry[]
+        extraFeed: Record<string, FeedItem[]>
     }
     Methods: {
         confirmOrder(orderId: string, paidEur: number): Promise<void>
@@ -32,17 +34,29 @@ interface $MatchRoomContract {
             alarm: number | null
         }>
         getOrders(): Promise<Order[]>
+        getRoster(): Promise<RosterEntry[]>
         getState(): Promise<RoomState>
         /** Revealed events so far, e.g. for the stats agent or the archive. */
         getTimeline(): Promise<MatchEvent[]>
+        hireAgent(entry: { name: string; role: string; lang: FanLang; hiredBy: string }): Promise<RosterEntry[]>
         /** Jumps the replay so the next event revealed is `index` (demo shortcut to the big moments). */
         jumpTo(index: number): Promise<RoomState>
         pause(): Promise<RoomState>
         postAgentMsg(from: string, to: string, text: string, kind?: AgentKind): Promise<void>
-        postAnswer(userId: string, lang: Lang, text: string): Promise<void>
+        postAnswer(userId: string, lang: FanLang, text: string): Promise<void>
         postCommentary(eventId: number, lines: LangLines): Promise<void>
+        /** Commentary from a hired translator. `eventId` null is a backfill of the latest line. */
+        postExtraCommentary(eventId: number | null, lang: FanLang, text: string): Promise<void>
+        /** The agents process registers its base team on start; hired agents already on the roster stay. */
+        registerAgents(
+            team: {
+                name: string
+                role: string
+            }[]
+        ): Promise<RosterEntry[]>
         /** Clears everything back to before kick-off. */
         reset(): Promise<RoomState>
+        setAgentStatus(name: string, status: "idle" | "working"): Promise<void>
         setOffer(offer: Offer | null): Promise<void>
         setSpeed(tickMs: number): Promise<RoomState>
         start(tickMs?: number): Promise<RoomState>
@@ -77,6 +91,14 @@ type AgentOut =
           running: boolean
           cursor: number
       }
+    | {
+          type: "language_needed"
+          lang: FanLang
+          fans: number
+      }
+    | {
+          type: "reset"
+      }
 type ClientMsg =
     | {
           type: "vote"
@@ -90,11 +112,13 @@ type ClientMsg =
           type: "buy"
           offerId: string
       }
+type ExtraLang = "ja" | "fr" | "de" | "tr"
+type FanLang = Lang | ExtraLang
 type FeedItem = {
     id: string
     minute: number
     clock?: string
-    lang: Lang
+    lang: FanLang
     kind: "commentary" | "answer" | "system"
     text: string
     personal?: true
@@ -139,7 +163,7 @@ type Offer = {
 type Order = {
     id: string
     userId: string
-    lang: Lang
+    lang: FanLang
     offer: Offer
     ts: number
 }
@@ -160,7 +184,7 @@ type Predictions = Prediction[]
 type Question = {
     id: string
     userId: string
-    lang: Lang
+    lang: FanLang
     text: string
     ts: number
 }
@@ -180,6 +204,8 @@ type RoomState = {
     agentLog: AgentMsg[]
     feed: LangFeeds
     orders: number
+    roster: RosterEntry[]
+    languages: FanLang[]
 }
 type RoomStateMsg = Omit<
     Extract<
@@ -191,6 +217,14 @@ type RoomStateMsg = Omit<
     "type"
 > & {
     type: "room_state"
+}
+type RosterEntry = {
+    name: string
+    role: string
+    lang?: FanLang
+    hiredBy?: string
+    hiredAt?: number
+    status: "idle" | "working"
 }
 type Score = {
     home: number
@@ -227,7 +261,7 @@ type ServerMsg =
       }
 type SocketMeta = {
     userId: string
-    lang: Lang
+    lang: FanLang
 }
 
 export {}

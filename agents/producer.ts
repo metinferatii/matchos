@@ -40,14 +40,14 @@ export function startProducer(producer: Member, log: string[]) {
         const d = ruleDirective(e)
         // Only non-goal, non-trivial events get a model-chosen tone, inside the step budget.
         if (d.importance === "normal" || d.importance === "high") {
-            const out = await llmJson<{ tone?: string }>(
+            const out = await producer.task(() => llmJson<{ tone?: string }>(
                 "You are the producer of a live football fan feed. Give the commentator a tone note for the next line: " +
                 "max 8 words, specific to this moment (e.g. mention extra time, a comeback, the shootout pressure). " +
                 'Return JSON {"tone":"..."}. Use only facts in the event and context.',
                 `Event: ${describe(e)} (${PERIOD[e.period]}).\nPrevious events:\n${recent(e) || "(kick-off)"}`,
                 STEP_MS - 100,
                 { model: FAST_MODEL, maxTokens: 30 },
-            )
+            ))
             if (out?.tone) d.tone = out.tone.slice(0, 80)
         }
         await producer.post("commentator", `${e.clock} ${d.importance.toUpperCase()} · tone: ${d.tone} · act: ${d.act.join(", ")}`, {
@@ -60,7 +60,7 @@ export function startProducer(producer: Member, log: string[]) {
         if (m.kind !== "draft" || m.from !== "commentator" || m.data?.eventId === undefined) return
         const e = EVENTS[m.data.eventId]
         if (!e || isGoal(e)) return
-        const verdict = await llmJson<{ approve?: boolean; reason?: string }>(
+        const verdict = await producer.task(() => llmJson<{ approve?: boolean; reason?: string }>(
             "You are the producer reviewing one line of live football commentary before it is published. " +
             "Reject it only if it is generic, misses the key context of the moment (extra time, the shootout, the scoreline, a comeback), " +
             "states anything not in the event, or repeats a recent line. Otherwise approve. " +
@@ -68,7 +68,7 @@ export function startProducer(producer: Member, log: string[]) {
             `Event: ${describe(e)} (${PERIOD[e.period]}).\nTone asked: ${m.data.tone ?? "-"}\nDraft: ${m.data.line}\nRecent lines:\n${log.slice(-5).join("\n") || "(none)"}`,
             m.data.timeoutMs ?? STEP_MS - 100,
             { model: FAST_MODEL, maxTokens: 40, temperature: 0.2 },
-        )
+        ))
         if (!verdict) return // timed out: the commentator publishes its draft
         if (verdict.approve === false && verdict.reason)
             await producer.post("commentator", `Rejected ${e.clock}: ${verdict.reason}`, { kind: "rejection", ref: e.id, data: { reason: verdict.reason } })
