@@ -34,7 +34,9 @@ export type Score = { home: number; away: number }
 export type Prediction = { player: string; votes: number }
 export type Predictions = Prediction[]
 
-export type AgentMsg = { from: string; to: string; text: string; ts: number }
+// Newsroom message kinds, for styling the agent log. Optional: older messages have none.
+export type AgentKind = "directive" | "draft" | "rejection" | "proposal" | "counter" | "agreement" | "hire" | "initiative" | "note"
+export type AgentMsg = { from: string; to: string; text: string; ts: number; kind?: AgentKind }
 
 export type ServerMsg =
     | { type: "state"; score: Score; minute: number; clock?: string; feed: FeedItem[]; offer: Offer | null; predictions: Predictions }

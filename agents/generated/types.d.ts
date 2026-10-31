@@ -38,7 +38,7 @@ interface $MatchRoomContract {
         /** Jumps the replay so the next event revealed is `index` (demo shortcut to the big moments). */
         jumpTo(index: number): Promise<RoomState>
         pause(): Promise<RoomState>
-        postAgentMsg(from: string, to: string, text: string): Promise<void>
+        postAgentMsg(from: string, to: string, text: string, kind?: AgentKind): Promise<void>
         postAnswer(userId: string, lang: Lang, text: string): Promise<void>
         postCommentary(eventId: number, lines: LangLines): Promise<void>
         /** Clears everything back to before kick-off. */
@@ -48,11 +48,14 @@ interface $MatchRoomContract {
         start(tickMs?: number): Promise<RoomState>
     }
 }
+type AgentKind =
+    "directive" | "draft" | "rejection" | "proposal" | "counter" | "agreement" | "hire" | "initiative" | "note"
 type AgentMsg = {
     from: string
     to: string
     text: string
     ts: number
+    kind?: AgentKind
 }
 type AgentOut =
     | {
@@ -114,6 +117,7 @@ type MatchEvent = {
     minute: number
     second: number
     period: number
+    displayMinute: number
     clock: string
     type: string
     team: string | null

@@ -1,7 +1,7 @@
 import { Actor, Persisted, type ActorSocket } from "terse-sdk/actor"
 import match from "./match.json" with { type: "json" }
 import { templateLine } from "./templates.js"
-import type { AgentMsg, ClientMsg, FeedItem, Lang, MatchEvent, Offer, Predictions, Score, ServerMsg, SocketMeta } from "./contract.js"
+import type { AgentKind, AgentMsg, ClientMsg, FeedItem, Lang, MatchEvent, Offer, Predictions, Score, ServerMsg, SocketMeta } from "./contract.js"
 
 const EVENTS = match.events as MatchEvent[]
 const LANGS: Lang[] = ["en", "sq", "es", "ar"]
@@ -174,8 +174,8 @@ export class MatchRoom extends Actor<SocketMeta, ClientMsg, Outgoing> {
         this.commentedThrough = Math.max(this.commentedThrough, eventId)
     }
 
-    async postAgentMsg(from: string, to: string, text: string): Promise<void> {
-        const msg: AgentMsg = { from, to, text: text.slice(0, 400), ts: Date.now() }
+    async postAgentMsg(from: string, to: string, text: string, kind?: AgentKind): Promise<void> {
+        const msg: AgentMsg = { from, to, text: text.slice(0, 400), ts: Date.now(), ...(kind ? { kind } : {}) }
         this.agentLog = [...this.agentLog, msg].slice(-LOG_MAX)
         this.broadcast({ type: "agent", msg })
     }
