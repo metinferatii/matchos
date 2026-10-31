@@ -207,8 +207,28 @@
 
   function lastServerId() { return S.feed.length ? S.feed[S.feed.length - 1].id : null; }
 
+  // The wire format follows the RN SDK (numeric `minute`, `predictions` as [{player, votes}]).
+  // The widget keys goals and pens on the display clock, so map back to that on the way in.
+  function clockOf(x) { return x.clock || (typeof x.minute === "number" ? x.minute + "'" : x.minute); }
+  function normalize(m) {
+    if (m.type === "state" || m.type === "score") m.minute = clockOf(m);
+    if (m.item) m.item.minute = clockOf(m.item);
+    if (Array.isArray(m.feed)) {
+      // Personal items (answers, order confirmations) arrive live and are kept in `local` already.
+      m.feed = m.feed.filter(function (it) { return !it.personal; });
+      m.feed.forEach(function (it) { it.minute = clockOf(it); });
+    }
+    if (Array.isArray(m.predictions)) {
+      var counts = {};
+      m.predictions.forEach(function (p) { counts[p.player] = p.votes; });
+      m.predictions = counts;
+    }
+    return m;
+  }
+
   function onMessage(m) {
     if (!m || !m.type) return;
+    normalize(m);
     if (m.type === "state") {
       var prevTotal = S.score.home + S.score.away;
       S.score = m.score || { home: 0, away: 0 };
@@ -430,9 +450,10 @@
     var team = teamOf[o.player] || homeName();
     $("jersey").innerHTML = jerseySvg(o.player, team);
     $("offerTitle").textContent = o.title || (o.player + " " + T.jersey);
-    var now = Math.round(o.priceEur * (1 - (o.discountPct || 0) / 100) * 100) / 100;
-    $("priceNow").textContent = price(now);
-    $("priceWas").textContent = price(o.priceEur);
+    // priceEur is the final price; originalPriceEur (optional) is the struck-through one.
+    var was = o.originalPriceEur || Math.round((o.priceEur / (1 - (o.discountPct || 0) / 100)) * 100) / 100;
+    $("priceNow").textContent = price(o.priceEur);
+    $("priceWas").textContent = price(was);
     $("priceOff").textContent = "-" + (o.discountPct || 0) + "%";
     var wrap = $("sheetWrap");
     wrap.hidden = false;

@@ -127,7 +127,9 @@ function clock(period: number, minute: number): string {
 let cur = { home: 0, away: 0 }, so = { home: 0, away: 0 }
 const final = out.map((e, i) => {
     cur = e.score ?? cur; so = e.shootout ?? so
-    return { id: i, ...e, clock: clock(e.period, e.minute), score: { ...cur }, shootout: e.period === 5 ? { ...so } : undefined }
+    // displayMinute is the number fans see (StatsBomb counts from 0, so Messi's 23' penalty is minute 22).
+    const displayMinute = e.period === 5 ? e.minute : e.minute + 1
+    return { id: i, ...e, displayMinute, clock: clock(e.period, e.minute), score: { ...cur }, shootout: e.period === 5 ? { ...so } : undefined }
 })
 
 mkdirSync("data", { recursive: true })

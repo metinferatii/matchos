@@ -11,14 +11,15 @@ interface $MatchRoomContract {
         tickMs: number
         cursor: number
         score: Score
-        minute: string
+        matchMinute: number
+        clock: string
         feed: LangFeeds
         agentLog: AgentMsg[]
         offer: Offer | null
         votes: Record<string, string>
-        predictions: Predictions
         commentedThrough: number
         orders: Order[]
+        personal: Record<string, FeedItem[]>
     }
     Methods: {
         confirmOrder(orderId: string, paidEur: number): Promise<void>
@@ -88,10 +89,12 @@ type ClientMsg =
       }
 type FeedItem = {
     id: string
-    minute: string
+    minute: number
+    clock?: string
     lang: Lang
     kind: "commentary" | "answer" | "system"
     text: string
+    personal?: true
 }
 type Lang = "en" | "sq" | "es" | "ar"
 type LangFeeds = {
@@ -125,12 +128,14 @@ type Offer = {
     player: string
     title: string
     priceEur: number
+    originalPriceEur?: number
     discountPct: number
     expiresAt: number
 }
 type Order = {
     id: string
     userId: string
+    lang: Lang
     offer: Offer
     ts: number
 }
@@ -143,7 +148,11 @@ type Outgoing =
       >
     | RoomStateMsg
     | AgentOut
-type Predictions = Record<string, number>
+type Prediction = {
+    player: string
+    votes: number
+}
+type Predictions = Prediction[]
 type Question = {
     id: string
     userId: string
@@ -159,7 +168,8 @@ type RoomState = {
     total: number
     score: Score
     shootout: Score | null
-    minute: string
+    minute: number
+    clock: string
     offer: Offer | null
     predictions: Predictions
     lastEvent: MatchEvent | null
@@ -186,7 +196,8 @@ type ServerMsg =
     | {
           type: "state"
           score: Score
-          minute: string
+          minute: number
+          clock?: string
           feed: FeedItem[]
           offer: Offer | null
           predictions: Predictions
@@ -195,7 +206,8 @@ type ServerMsg =
           type: "score"
           home: number
           away: number
-          minute: string
+          minute: number
+          clock?: string
       }
     | {
           type: "feed"

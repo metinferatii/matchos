@@ -1,6 +1,6 @@
 // Gateway: the only thing fans' devices talk to.
 //  - GET  /connect?match=&userId=&lang=   -> { websocketUrl }   (same handshake as the mock)
-//  - WS   /ws?match=&userId=&lang=        -> proxied to the MatchRoom actor socket
+//  - WS   /ws?match=&userId=&lang=        -> proxied to the MatchRoom actor socket (matchId= also works)
 //  - GET  /api/state?match=               -> full room state (control room)
 //  - POST /api/control?match=&action=start|pause|reset|speed|jump&value=
 //  - static files from web/ (embed.js, widget, control room, club site)
@@ -25,7 +25,8 @@ const room = (id: string) => actors.MatchRoom.get(id)
 function params(url: URL) {
     const lang = url.searchParams.get("lang") as Lang
     return {
-        match: url.searchParams.get("match") || DEFAULT_MATCH,
+        // The RN SDK sends `matchId`; the web widget and /connect use `match`.
+        match: url.searchParams.get("matchId") || url.searchParams.get("match") || DEFAULT_MATCH,
         userId: (url.searchParams.get("userId") || crypto.randomUUID()).slice(0, 64),
         lang: LANGS.includes(lang) ? lang : "en",
     }

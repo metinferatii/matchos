@@ -98,6 +98,9 @@ async function say(agent: RelayAgentClient, from: string, to: string, text: stri
     console.log(`${from.padEnd(11)} → ${to.padEnd(12)} ${untag(text)}`)
 }
 
+// So the commentator never guesses a brace or hat-trick: goals by this player up to and including this one.
+const goalsBy = (e: MatchEvent) => EVENTS.filter(x => x.type === "goal" && x.player === e.player && x.id <= e.id).length
+const ordinal = (n: number) => ["first", "second", "third", "fourth"][n - 1] ?? `${n}th`
 const other = (team: string | null) => (team === match.home.name ? match.away.name : match.home.name)
 const describe = (e: MatchEvent) => {
     const score = e.period === 5 && e.shootout ? `pens ${e.shootout.home}-${e.shootout.away}` : `${e.score.home}-${e.score.away}`
@@ -105,6 +108,7 @@ const describe = (e: MatchEvent) => {
     const who =
         e.type === "penalty_awarded" ? ` · to ${other(e.team)}, conceded by ${e.player} (${e.team})`
         : e.type === "substitution" ? ` · ${e.team}: ${e.detail}`
+        : e.type === "goal" ? ` · ${e.player} (${e.team}), his ${ordinal(goalsBy(e))} goal of the match`
         : `${e.player ? ` · ${e.player}` : ""}${e.team ? ` (${e.team})` : ""}`
     return `${e.clock} ${e.type.replace(/_/g, " ").toUpperCase()}${who} · ${score}`
 }
@@ -176,7 +180,8 @@ merch.relay.addListener("message.created", async ({ message, envelope }) => {
         id: crypto.randomUUID(),
         player: e.player,
         title: `${e.player} #${JERSEY[e.player] ?? 10} ${e.team} Home Jersey`,
-        priceEur: 89.99,
+        priceEur: 71.99, // what the fan pays
+        originalPriceEur: 89.99,
         discountPct: 20,
         expiresAt: Date.now() + 10 * 60_000,
     }
@@ -196,9 +201,9 @@ stats.relay.addListener("dm.received", async ({ message, envelope }) => {
     const answer = (await llm(
         `You answer football fans' questions during a live match, using ONLY the match data given. Answer in ${LANG_NAME[q.lang]}, in 1-2 short sentences. ` +
         "If the data doesn't contain the answer, say so briefly and give the current score. Never invent stats.",
-        `Current: ${state.minute}, Argentina ${state.score.home}-${state.score.away} France${state.shootout ? ` (penalties ${state.shootout.home}-${state.shootout.away})` : ""}.\nEvents so far:\n${facts || "(not started)"}\n\nQuestion: ${q.text}`,
+        `Current: ${state.clock}, Argentina ${state.score.home}-${state.score.away} France${state.shootout ? ` (penalties ${state.shootout.home}-${state.shootout.away})` : ""}.\nEvents so far:\n${facts || "(not started)"}\n\nQuestion: ${q.text}`,
         { timeoutMs: 4000, temperature: 0.2 },
-    )) ?? `${state.minute}: Argentina ${state.score.home}-${state.score.away} France.`
+    )) ?? `${state.clock}: Argentina ${state.score.home}-${state.score.away} France.`
     await room.postAnswer(q.userId, q.lang, answer)
     await say(stats.agent, "stats", "#match", `Answered (${q.lang}): ${answer}`)
 })
@@ -208,7 +213,7 @@ stats.relay.addListener("dm.received", async ({ message, envelope }) => {
 const pendingQuestions = new Map<string, { userId: string; lang: Lang; text: string }>()
 
 async function handleOrder(order: { id: string; userId: string; offer: Offer }) {
-    const price = +(order.offer.priceEur * (1 - order.offer.discountPct / 100)).toFixed(2)
+    const price = order.offer.priceEur
     const saved = await supabase("orders", { id: order.id, match_id: MATCH_ID, user_id: order.userId, offer: { ...order.offer, paidEur: price } })
     await room.confirmOrder(order.id, price)
     await say(merch.agent, "merch", "#match", `🛒 Sold ${order.offer.title} for €${price.toFixed(2)}${saved ? " · saved to Supabase" : ""}`)

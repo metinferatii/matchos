@@ -216,8 +216,8 @@
     st = s;
     $("tHs").textContent = s.score.home;
     $("tAs").textContent = s.score.away;
-    $("tMin").textContent = s.minute === "0'" ? "Pre-match" : s.minute === "PENS" ? "Pens" : s.minute;
-    var pens = s.minute === "PENS" && s.shootout;
+    $("tMin").textContent = s.clock === "0'" ? "Pre-match" : s.clock === "PENS" ? "Pens" : s.clock;
+    var pens = s.clock === "PENS" && s.shootout;
     $("tPens").hidden = !pens;
     if (pens) $("tPens").textContent = "Pens " + s.shootout.home + "–" + s.shootout.away;
     var play = $("btnPlay");
@@ -225,7 +225,7 @@
     play.classList.toggle("running", !!s.running);
     document.querySelectorAll("#speed button").forEach(function (b) { b.classList.toggle("on", +b.dataset.ms === s.tickMs); });
     $("stEvent").textContent = s.cursor + " / " + s.total;
-    var votes = 0; Object.keys(s.predictions || {}).forEach(function (k) { votes += s.predictions[k]; });
+    var votes = 0; (s.predictions || []).forEach(function (p) { votes += p.votes; });
     $("stVotes").textContent = votes;
     $("stOrders").textContent = s.orders || 0;
     var o = s.offer, offerEl = $("stOffer");

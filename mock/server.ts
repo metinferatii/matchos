@@ -18,12 +18,28 @@ const events = match.events as MatchEvent[]
 
 let cursor = 0
 let score = { home: 0, away: 0 }
-let minute = "0'"
+let minute = 0
+let clock = "0'"
 let offer: Offer | null = null
-let predictions: Predictions = {}
-const voted = new Map<string, string>()
+let votes = new Map<string, string>()
+const predictions = (): Predictions => {
+    const counts = new Map<string, number>()
+    for (const p of votes.values()) counts.set(p, (counts.get(p) ?? 0) + 1)
+    return [...counts].map(([player, n]) => ({ player, votes: n })).sort((a, b) => b.votes - a.votes)
+}
 const feed: Record<Lang, FeedItem[]> = { en: [], sq: [], es: [], ar: [] }
 const sockets = new Set<ServerWebSocket<SocketMeta>>()
+// Per-fan answers/confirmations, included in that fan's `state` (the RN SDK replaces its feed on each state).
+const personal = new Map<string, FeedItem[]>()
+const stateFor = (ws: ServerWebSocket<SocketMeta>): ServerMsg => ({
+    type: "state", score, minute, clock, offer, predictions: predictions(),
+    feed: [...feed[ws.data.lang], ...(personal.get(ws.data.userId) ?? []).filter(i => i.lang === ws.data.lang)],
+})
+const sendPersonal = (ws: ServerWebSocket<SocketMeta>, kind: FeedItem["kind"], text: string) => {
+    const item: FeedItem = { id: crypto.randomUUID(), minute, clock, lang: ws.data.lang, kind, text, personal: true }
+    personal.set(ws.data.userId, [...(personal.get(ws.data.userId) ?? []), item].slice(-20))
+    send(ws, { type: "feed", item })
+}
 
 const send = (ws: ServerWebSocket<SocketMeta>, msg: ServerMsg) => ws.send(JSON.stringify(msg))
 const broadcast = (msg: ServerMsg, lang?: Lang) => {
@@ -34,7 +50,7 @@ const agent = (from: string, to: string, text: string) => {
     broadcast({ type: "agent", msg })
 }
 const pushFeed = (lang: Lang, kind: FeedItem["kind"], text: string) => {
-    const item: FeedItem = { id: crypto.randomUUID(), minute, lang, kind, text }
+    const item: FeedItem = { id: crypto.randomUUID(), minute, clock, lang, kind, text }
     feed[lang] = [...feed[lang], item].slice(-100)
     broadcast({ type: "feed", item }, lang)
 }
@@ -42,12 +58,13 @@ const pushFeed = (lang: Lang, kind: FeedItem["kind"], text: string) => {
 function tick() {
     if (cursor >= events.length) {
         // Loop the replay after full time so the mock never runs dry.
-        cursor = 0; score = { home: 0, away: 0 }; offer = null; predictions = {}; voted.clear()
+        cursor = 0; score = { home: 0, away: 0 }; offer = null; votes.clear(); personal.clear()
         for (const l of LANGS) feed[l] = []
         broadcast({ type: "offer", offer: null })
     }
     const e = events[cursor++]
-    minute = e.clock
+    minute = e.displayMinute
+    clock = e.clock
     agent("ingest", "#match", `${e.clock} ${e.type} ${e.player ?? ""} (${e.team ?? "-"})`.trim())
     const en = templateLine(e, "en")
     agent("commentator", "#match", en)
@@ -56,21 +73,21 @@ function tick() {
 
     if (e.score.home !== score.home || e.score.away !== score.away || e.type === "kickoff") {
         score = { ...e.score }
-        broadcast({ type: "score", home: score.home, away: score.away, minute })
+        broadcast({ type: "score", home: score.home, away: score.away, minute, clock })
     }
     if (e.type === "goal" && e.player) {
         offer = {
             id: crypto.randomUUID(),
             player: e.player,
             title: `${e.player} ${e.team} home jersey`,
-            priceEur: 89.99,
+            priceEur: 71.99,
+            originalPriceEur: 89.99,
             discountPct: 20,
             expiresAt: Date.now() + 10 * 60_000,
         }
         agent("merch", "#match", `Flash offer live: ${offer.title}, ${offer.discountPct}% off for 10 min`)
         broadcast({ type: "offer", offer })
-        predictions = {}
-        voted.clear()
+        votes.clear()
     }
 }
 
@@ -79,12 +96,12 @@ function answer(text: string): string {
     const goals = events.slice(0, cursor).filter(e => e.type === "goal")
     if (q.includes("who") && q.includes("scor"))
         return goals.length ? `Goals so far: ${goals.map(g => `${g.player} ${g.clock}`).join(", ")}.` : "No goals yet."
-    if (q.includes("score")) return `It's ${score.home}-${score.away} at ${minute}.`
+    if (q.includes("score")) return `It's ${score.home}-${score.away} at ${clock}.`
     if (q.includes("card")) {
         const cards = events.slice(0, cursor).filter(e => e.type.endsWith("_card"))
         return cards.length ? `Cards: ${cards.map(c => `${c.player} ${c.clock}`).join(", ")}.` : "No cards yet."
     }
-    return `(mock) It's ${score.home}-${score.away} at ${minute}. The real stats agent will answer this properly.`
+    return `(mock) It's ${score.home}-${score.away} at ${clock}. The real stats agent will answer this properly.`
 }
 
 const server = Bun.serve<SocketMeta>({
@@ -93,11 +110,12 @@ const server = Bun.serve<SocketMeta>({
     fetch(req, srv) {
         const url = new URL(req.url)
         const cors = { "access-control-allow-origin": "*" }
+        const match = url.searchParams.get("matchId") || url.searchParams.get("match") || "wc22-final"
         const lang = (LANGS.includes(url.searchParams.get("lang") as Lang) ? url.searchParams.get("lang") : "en") as Lang
         const userId = url.searchParams.get("userId") ?? crypto.randomUUID()
         if (url.pathname === "/connect") {
             const host = req.headers.get("host") ?? `localhost:${PORT}`
-            return Response.json({ websocketUrl: `ws://${host}/ws?userId=${encodeURIComponent(userId)}&lang=${lang}` }, { headers: cors })
+            return Response.json({ websocketUrl: `ws://${host}/ws?matchId=${encodeURIComponent(match)}&userId=${encodeURIComponent(userId)}&lang=${lang}` }, { headers: cors })
         }
         if (url.pathname === "/ws" && srv.upgrade(req, { data: { userId, lang } })) return
         if (url.pathname === "/match.json") return Response.json(match, { headers: cors })
@@ -106,27 +124,22 @@ const server = Bun.serve<SocketMeta>({
     websocket: {
         open(ws) {
             sockets.add(ws)
-            send(ws, { type: "state", score, minute, feed: feed[ws.data.lang], offer, predictions })
+            send(ws, stateFor(ws))
         },
         close(ws) { sockets.delete(ws) },
         message(ws, raw) {
             let msg: ClientMsg
             try { msg = JSON.parse(String(raw)) } catch { return }
             if (msg.type === "vote") {
-                const prev = voted.get(ws.data.userId)
-                if (prev) predictions = { ...predictions, [prev]: Math.max(0, (predictions[prev] ?? 1) - 1) }
-                voted.set(ws.data.userId, msg.player)
-                predictions = { ...predictions, [msg.player]: (predictions[msg.player] ?? 0) + 1 }
+                votes.set(ws.data.userId, msg.player)
                 // Predictions ride along on the state message; re-send so every client sees new counts.
-                for (const s of sockets) send(s, { type: "state", score, minute, feed: feed[s.data.lang], offer, predictions })
+                for (const s of sockets) send(s, stateFor(s))
             } else if (msg.type === "ask") {
                 agent("stats", "#match", `Q: ${msg.text}`)
-                const item: FeedItem = { id: crypto.randomUUID(), minute, lang: ws.data.lang, kind: "answer", text: answer(msg.text) }
-                send(ws, { type: "feed", item })
+                sendPersonal(ws, "answer", answer(msg.text))
             } else if (msg.type === "buy") {
                 agent("merch", "#match", `Order placed by ${ws.data.userId} for offer ${msg.offerId}`)
-                const item: FeedItem = { id: crypto.randomUUID(), minute, lang: ws.data.lang, kind: "system", text: "Order confirmed! 🎉" }
-                send(ws, { type: "feed", item })
+                sendPersonal(ws, "system", "Order confirmed! 🎉")
             }
         },
     },

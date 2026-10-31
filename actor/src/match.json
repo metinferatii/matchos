@@ -28,6 +28,7 @@
    ],
    "type": "kickoff",
    "detail": "First half begins",
+   "displayMinute": 1,
    "clock": "1'",
    "score": {
     "home": 0,
@@ -51,6 +52,7 @@
     "home": 0,
     "away": 0
    },
+   "displayMinute": 5,
    "clock": "5'"
   },
   {
@@ -70,6 +72,7 @@
     "home": 0,
     "away": 0
    },
+   "displayMinute": 17,
    "clock": "17'"
   },
   {
@@ -85,6 +88,7 @@
    ],
    "type": "penalty_awarded",
    "detail": "Foul in the box, penalty awarded",
+   "displayMinute": 21,
    "clock": "21'",
    "score": {
     "home": 0,
@@ -108,6 +112,7 @@
     "home": 1,
     "away": 0
    },
+   "displayMinute": 23,
    "clock": "23'"
   },
   {
@@ -127,6 +132,7 @@
     "home": 2,
     "away": 0
    },
+   "displayMinute": 36,
    "clock": "36'"
   },
   {
@@ -139,6 +145,7 @@
    "location": null,
    "type": "substitution",
    "detail": "Kolo Muani replaces Dembélé",
+   "displayMinute": 41,
    "clock": "41'",
    "score": {
     "home": 2,
@@ -155,6 +162,7 @@
    "location": null,
    "type": "substitution",
    "detail": "Thuram replaces Giroud",
+   "displayMinute": 42,
    "clock": "42'",
    "score": {
     "home": 2,
@@ -174,6 +182,7 @@
    ],
    "type": "yellow_card",
    "detail": "Yellow Card",
+   "displayMinute": 52,
    "clock": "45+7'",
    "score": {
     "home": 2,
@@ -190,6 +199,7 @@
    "location": null,
    "type": "half_end",
    "detail": "First half ends",
+   "displayMinute": 53,
    "clock": "45+8'",
    "score": {
     "home": 2,
@@ -209,6 +219,7 @@
    ],
    "type": "kickoff",
    "detail": "Second half begins",
+   "displayMinute": 46,
    "clock": "46'",
    "score": {
     "home": 2,
@@ -232,6 +243,7 @@
     "home": 2,
     "away": 0
    },
+   "displayMinute": 49,
    "clock": "49'"
   },
   {
@@ -247,6 +259,7 @@
    ],
    "type": "yellow_card",
    "detail": "Yellow Card",
+   "displayMinute": 55,
    "clock": "55'",
    "score": {
     "home": 2,
@@ -270,6 +283,7 @@
     "home": 2,
     "away": 0
    },
+   "displayMinute": 59,
    "clock": "59'"
   },
   {
@@ -289,6 +303,7 @@
     "home": 2,
     "away": 0
    },
+   "displayMinute": 60,
    "clock": "60'"
   },
   {
@@ -301,6 +316,7 @@
    "location": null,
    "type": "substitution",
    "detail": "Acuña replaces Di María",
+   "displayMinute": 64,
    "clock": "64'",
    "score": {
     "home": 2,
@@ -324,6 +340,7 @@
     "home": 2,
     "away": 0
    },
+   "displayMinute": 68,
    "clock": "68'"
   },
   {
@@ -336,6 +353,7 @@
    "location": null,
    "type": "substitution",
    "detail": "Camavinga replaces Theo Hernández",
+   "displayMinute": 71,
    "clock": "71'",
    "score": {
     "home": 2,
@@ -352,6 +370,7 @@
    "location": null,
    "type": "substitution",
    "detail": "Coman replaces Griezmann",
+   "displayMinute": 71,
    "clock": "71'",
    "score": {
     "home": 2,
@@ -375,6 +394,7 @@
     "home": 2,
     "away": 0
    },
+   "displayMinute": 72,
    "clock": "72'"
   },
   {
@@ -390,6 +410,7 @@
    ],
    "type": "penalty_awarded",
    "detail": "Foul in the box, penalty awarded",
+   "displayMinute": 79,
    "clock": "79'",
    "score": {
     "home": 2,
@@ -413,6 +434,7 @@
     "home": 2,
     "away": 1
    },
+   "displayMinute": 80,
    "clock": "80'"
   },
   {
@@ -432,6 +454,7 @@
     "home": 2,
     "away": 2
    },
+   "displayMinute": 81,
    "clock": "81'"
   },
   {
@@ -447,6 +470,7 @@
    ],
    "type": "yellow_card",
    "detail": "Yellow Card",
+   "displayMinute": 87,
    "clock": "87'",
    "score": {
     "home": 2,
@@ -470,6 +494,7 @@
     "home": 2,
     "away": 2
    },
+   "displayMinute": 94,
    "clock": "90+4'"
   },
   {
@@ -482,6 +507,7 @@
    "location": null,
    "type": "yellow_card",
    "detail": "Yellow Card",
+   "displayMinute": 95,
    "clock": "90+5'",
    "score": {
     "home": 2,
@@ -505,6 +531,7 @@
     "home": 2,
     "away": 2
    },
+   "displayMinute": 97,
    "clock": "90+7'"
   },
   {
@@ -520,6 +547,7 @@
    ],
    "type": "yellow_card",
    "detail": "Yellow Card",
+   "displayMinute": 98,
    "clock": "90+8'",
    "score": {
     "home": 2,
@@ -536,6 +564,7 @@
    "location": null,
    "type": "half_end",
    "detail": "Second half ends",
+   "displayMinute": 99,
    "clock": "90+9'",
    "score": {
     "home": 2,
@@ -555,6 +584,7 @@
    ],
    "type": "kickoff",
    "detail": "Extra time, first half begins",
+   "displayMinute": 91,
    "clock": "91'",
    "score": {
     "home": 2,
@@ -571,6 +601,7 @@
    "location": null,
    "type": "substitution",
    "detail": "Montiel replaces Molina",
+   "displayMinute": 91,
    "clock": "91'",
    "score": {
     "home": 2,
@@ -587,6 +618,7 @@
    "location": null,
    "type": "substitution",
    "detail": "Fofana replaces Rabiot",
+   "displayMinute": 96,
    "clock": "96'",
    "score": {
     "home": 2,
@@ -603,6 +635,7 @@
    "location": null,
    "type": "substitution",
    "detail": "Paredes replaces De Paul",
+   "displayMinute": 102,
    "clock": "102'",
    "score": {
     "home": 2,
@@ -619,6 +652,7 @@
    "location": null,
    "type": "substitution",
    "detail": "Lautaro Martínez replaces Julián Álvarez",
+   "displayMinute": 102,
    "clock": "102'",
    "score": {
     "home": 2,
@@ -642,6 +676,7 @@
     "home": 2,
     "away": 2
    },
+   "displayMinute": 106,
    "clock": "105+1'"
   },
   {
@@ -654,6 +689,7 @@
    "location": null,
    "type": "half_end",
    "detail": "Extra time, first half ends",
+   "displayMinute": 107,
    "clock": "105+2'",
    "score": {
     "home": 2,
@@ -673,6 +709,7 @@
    ],
    "type": "kickoff",
    "detail": "Extra time, second half begins",
+   "displayMinute": 106,
    "clock": "106'",
    "score": {
     "home": 2,
@@ -696,6 +733,7 @@
     "home": 2,
     "away": 2
    },
+   "displayMinute": 107,
    "clock": "107'"
   },
   {
@@ -715,6 +753,7 @@
     "home": 2,
     "away": 2
    },
+   "displayMinute": 108,
    "clock": "108'"
   },
   {
@@ -734,6 +773,7 @@
     "home": 3,
     "away": 2
    },
+   "displayMinute": 108,
    "clock": "108'"
   },
   {
@@ -746,6 +786,7 @@
    "location": null,
    "type": "substitution",
    "detail": "Konaté replaces Varane",
+   "displayMinute": 113,
    "clock": "113'",
    "score": {
     "home": 3,
@@ -765,6 +806,7 @@
    ],
    "type": "yellow_card",
    "detail": "Yellow Card",
+   "displayMinute": 114,
    "clock": "114'",
    "score": {
     "home": 3,
@@ -781,6 +823,7 @@
    "location": null,
    "type": "substitution",
    "detail": "Pezzella replaces Mac Allister",
+   "displayMinute": 116,
    "clock": "116'",
    "score": {
     "home": 3,
@@ -800,6 +843,7 @@
    ],
    "type": "yellow_card",
    "detail": "Yellow Card",
+   "displayMinute": 116,
    "clock": "116'",
    "score": {
     "home": 3,
@@ -823,6 +867,7 @@
     "home": 3,
     "away": 2
    },
+   "displayMinute": 118,
    "clock": "118'"
   },
   {
@@ -842,6 +887,7 @@
     "home": 3,
     "away": 3
    },
+   "displayMinute": 118,
    "clock": "118'"
   },
   {
@@ -854,6 +900,7 @@
    "location": null,
    "type": "substitution",
    "detail": "Disasi replaces Koundé",
+   "displayMinute": 121,
    "clock": "120+1'",
    "score": {
     "home": 3,
@@ -870,6 +917,7 @@
    "location": null,
    "type": "substitution",
    "detail": "Dybala replaces Tagliafico",
+   "displayMinute": 121,
    "clock": "120+1'",
    "score": {
     "home": 3,
@@ -893,6 +941,7 @@
     "home": 3,
     "away": 3
    },
+   "displayMinute": 123,
    "clock": "120+3'"
   },
   {
@@ -912,6 +961,7 @@
     "home": 3,
     "away": 3
    },
+   "displayMinute": 123,
    "clock": "120+3'"
   },
   {
@@ -924,6 +974,7 @@
    "location": null,
    "type": "half_end",
    "detail": "Extra time, second half ends",
+   "displayMinute": 125,
    "clock": "120+5'",
    "score": {
     "home": 3,
@@ -943,6 +994,7 @@
    ],
    "type": "shootout_start",
    "detail": "Penalty shootout begins",
+   "displayMinute": 120,
    "clock": "PENS",
    "score": {
     "home": 3,
@@ -974,6 +1026,7 @@
     "home": 0,
     "away": 1
    },
+   "displayMinute": 120,
    "clock": "PENS"
   },
   {
@@ -997,6 +1050,7 @@
     "home": 1,
     "away": 1
    },
+   "displayMinute": 121,
    "clock": "PENS"
   },
   {
@@ -1020,6 +1074,7 @@
     "home": 1,
     "away": 1
    },
+   "displayMinute": 121,
    "clock": "PENS"
   },
   {
@@ -1043,6 +1098,7 @@
     "home": 2,
     "away": 1
    },
+   "displayMinute": 122,
    "clock": "PENS"
   },
   {
@@ -1066,6 +1122,7 @@
     "home": 2,
     "away": 1
    },
+   "displayMinute": 123,
    "clock": "PENS"
   },
   {
@@ -1089,6 +1146,7 @@
     "home": 3,
     "away": 1
    },
+   "displayMinute": 124,
    "clock": "PENS"
   },
   {
@@ -1101,6 +1159,7 @@
    "location": null,
    "type": "yellow_card",
    "detail": "Yellow Card",
+   "displayMinute": 124,
    "clock": "PENS",
    "score": {
     "home": 3,
@@ -1132,6 +1191,7 @@
     "home": 3,
     "away": 2
    },
+   "displayMinute": 125,
    "clock": "PENS"
   },
   {
@@ -1155,6 +1215,7 @@
     "home": 4,
     "away": 2
    },
+   "displayMinute": 125,
    "clock": "PENS"
   },
   {
@@ -1167,6 +1228,7 @@
    "location": null,
    "type": "full_time",
    "detail": "Penalty shootout ends",
+   "displayMinute": 125,
    "clock": "PENS",
    "score": {
     "home": 3,
