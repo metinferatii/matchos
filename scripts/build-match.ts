@@ -128,7 +128,10 @@ let cur = { home: 0, away: 0 }, so = { home: 0, away: 0 }
 const final = out.map((e, i) => {
     cur = e.score ?? cur; so = e.shootout ?? so
     // displayMinute is the number fans see (StatsBomb counts from 0, so Messi's 23' penalty is minute 22).
-    const displayMinute = e.period === 5 ? e.minute : e.minute + 1
+    // Stoppage time stays at the period's cap (45+7' -> 45) so minutes never go backwards at half-time,
+    // which matters to clients that sort the feed by minute (the RN SDK does).
+    const cap = [0, 45, 90, 105, 120][e.period]
+    const displayMinute = e.period === 5 ? e.minute : Math.min(e.minute + 1, cap)
     return { id: i, ...e, displayMinute, clock: clock(e.period, e.minute), score: { ...cur }, shootout: e.period === 5 ? { ...so } : undefined }
 })
 

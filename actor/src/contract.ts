@@ -53,7 +53,7 @@ export type MatchEvent = {
     minute: number // StatsBomb minute (0-based)
     second: number
     period: number
-    displayMinute: number // what fans see, as a number: 23 for 23', 52 for 45+7'; the wire `minute`
+    displayMinute: number // what fans see, as a number: 23 for 23', 45 for 45+7' (never decreases); the wire `minute`
     clock: string
     type: string
     team: string | null

@@ -182,7 +182,7 @@
    ],
    "type": "yellow_card",
    "detail": "Yellow Card",
-   "displayMinute": 52,
+   "displayMinute": 45,
    "clock": "45+7'",
    "score": {
     "home": 2,
@@ -199,7 +199,7 @@
    "location": null,
    "type": "half_end",
    "detail": "First half ends",
-   "displayMinute": 53,
+   "displayMinute": 45,
    "clock": "45+8'",
    "score": {
     "home": 2,
@@ -494,7 +494,7 @@
     "home": 2,
     "away": 2
    },
-   "displayMinute": 94,
+   "displayMinute": 90,
    "clock": "90+4'"
   },
   {
@@ -507,7 +507,7 @@
    "location": null,
    "type": "yellow_card",
    "detail": "Yellow Card",
-   "displayMinute": 95,
+   "displayMinute": 90,
    "clock": "90+5'",
    "score": {
     "home": 2,
@@ -531,7 +531,7 @@
     "home": 2,
     "away": 2
    },
-   "displayMinute": 97,
+   "displayMinute": 90,
    "clock": "90+7'"
   },
   {
@@ -547,7 +547,7 @@
    ],
    "type": "yellow_card",
    "detail": "Yellow Card",
-   "displayMinute": 98,
+   "displayMinute": 90,
    "clock": "90+8'",
    "score": {
     "home": 2,
@@ -564,7 +564,7 @@
    "location": null,
    "type": "half_end",
    "detail": "Second half ends",
-   "displayMinute": 99,
+   "displayMinute": 90,
    "clock": "90+9'",
    "score": {
     "home": 2,
@@ -676,7 +676,7 @@
     "home": 2,
     "away": 2
    },
-   "displayMinute": 106,
+   "displayMinute": 105,
    "clock": "105+1'"
   },
   {
@@ -689,7 +689,7 @@
    "location": null,
    "type": "half_end",
    "detail": "Extra time, first half ends",
-   "displayMinute": 107,
+   "displayMinute": 105,
    "clock": "105+2'",
    "score": {
     "home": 2,
@@ -900,7 +900,7 @@
    "location": null,
    "type": "substitution",
    "detail": "Disasi replaces Koundé",
-   "displayMinute": 121,
+   "displayMinute": 120,
    "clock": "120+1'",
    "score": {
     "home": 3,
@@ -917,7 +917,7 @@
    "location": null,
    "type": "substitution",
    "detail": "Dybala replaces Tagliafico",
-   "displayMinute": 121,
+   "displayMinute": 120,
    "clock": "120+1'",
    "score": {
     "home": 3,
@@ -941,7 +941,7 @@
     "home": 3,
     "away": 3
    },
-   "displayMinute": 123,
+   "displayMinute": 120,
    "clock": "120+3'"
   },
   {
@@ -961,7 +961,7 @@
     "home": 3,
     "away": 3
    },
-   "displayMinute": 123,
+   "displayMinute": 120,
    "clock": "120+3'"
   },
   {
@@ -974,7 +974,7 @@
    "location": null,
    "type": "half_end",
    "detail": "Extra time, second half ends",
-   "displayMinute": 125,
+   "displayMinute": 120,
    "clock": "120+5'",
    "score": {
     "home": 3,

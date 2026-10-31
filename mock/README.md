@@ -15,7 +15,7 @@ Replays the 2022 World Cup final (62 key events, StatsBomb Open Data) over the r
 From a phone, use the laptop's LAN IP (`ipconfig getifaddr en0`). The server binds 0.0.0.0.
 
 Notes (the shapes match the RN SDK's `src/sdk/types.ts`):
-- `minute` is a number: the minute fans see (23 for 23', 53 for 45+8', 120+ in the shootout). The extra `clock` field has the display text (`"45+8'"`, `"PENS"`).
+- `minute` is a number: the minute fans see (23 for 23', 45 for 45+8' so it never goes backwards, 120+ in the shootout). The extra `clock` field has the display text (`"45+8'"`, `"PENS"`).
 - `predictions` is `[{ player, votes }]`, most votes first. There is no dedicated predictions message, so after a vote the server re-sends `state` to everyone. Treat `state` as a full reset.
 - `offer.priceEur` is the final price. `originalPriceEur` (extra) is the price before `discountPct`. `expiresAt` is epoch ms; `{type:"offer", offer:null}` clears the offer.
 - Feed items with `personal: true` (answers, order confirmations) are only for that fan, and are included again in their `state` so a re-sent state doesn't wipe them.
