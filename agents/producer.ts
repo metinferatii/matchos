@@ -2,7 +2,7 @@
 // and normal/high commentary drafts get one review. Goals are never held up: their directive is
 // rule-based and instant, and they are never reviewed.
 import type { MatchEvent } from "../shared/contract"
-import { EVENTS, FAST_MODEL, PERIOD, STEP_MS, describe, isGoal, llmJson, type Member } from "./core"
+import { AWAY, EVENTS, FAST_MODEL, HOME, PERIOD, STEP_MS, describe, isGoal, llmJson, type Member } from "./core"
 
 export type Importance = "low" | "normal" | "high" | "huge"
 export type Directive = { importance: Importance; tone: string; act: string[] }
@@ -29,6 +29,16 @@ export function ruleDirective(e: MatchEvent): Directive {
     return { importance, tone: RULE_TONE[importance], act }
 }
 
+const REJECT_EVERY = Number(process.env.REJECT_EVERY ?? 3)
+
+/** The hard facts at this event, spelled out so the producer can't misread who leads. */
+function facts(e: MatchEvent): string {
+    const { home, away } = e.score
+    const lead = home === away ? "level" : `${home > away ? HOME : AWAY} lead, ${home > away ? AWAY : HOME} trail`
+    const pens = e.period === 5 && e.shootout ? ` Shootout: ${HOME} ${e.shootout.home}-${e.shootout.away} ${AWAY}.` : ""
+    return `Facts: ${e.clock}, ${PERIOD[e.period]}. Score ${HOME} ${home}-${away} ${AWAY} (${lead}).${pens}\nEvent: ${describe(e)}.`
+}
+
 const recent = (e: MatchEvent) => EVENTS.slice(Math.max(0, e.id - 4), e.id).map(describe).join("\n")
 
 export function startProducer(producer: Member, log: string[]) {
@@ -44,7 +54,7 @@ export function startProducer(producer: Member, log: string[]) {
                 "You are the producer of a live football fan feed. Give the commentator a tone note for the next line: " +
                 "max 8 words, specific to this moment (e.g. mention extra time, a comeback, the shootout pressure). " +
                 'Return JSON {"tone":"..."}. Use only facts in the event and context.',
-                `Event: ${describe(e)} (${PERIOD[e.period]}).\nPrevious events:\n${recent(e) || "(kick-off)"}`,
+                `${facts(e)}\nPrevious events:\n${recent(e) || "(kick-off)"}`,
                 STEP_MS - 100,
                 { model: FAST_MODEL, maxTokens: 30 },
             ))
@@ -55,23 +65,40 @@ export function startProducer(producer: Member, log: string[]) {
         })
     })
 
-    // Review: one look at each normal/high draft; reject at most once with a concrete reason.
+    // Review: one look at each normal/high draft; reject at most once, and only for a reason that holds
+    // up against the hard facts. Rejections are rationed (at most one in every REJECT_EVERY drafts) so
+    // they stay meaningful and the feed keeps its pace.
+    let draftsSinceRejection = REJECT_EVERY
     producer.on(async m => {
         if (m.kind !== "draft" || m.from !== "commentator" || m.data?.eventId === undefined) return
         const e = EVENTS[m.data.eventId]
         if (!e || isGoal(e)) return
+        draftsSinceRejection++
+        // A rule that can't be wrong: in extra time or the shootout, the line has to say so.
+        const context = e.period === 5 ? { re: /shoot-?out|penalt|spot|kick/i, reason: "too generic, say it's the penalty shootout" }
+            : e.period >= 3 ? { re: /extra[- ]time|overtime|\b1[01]\d'?/i, reason: "too generic, mention it's extra time" } : null
+        if (context && !context.re.test(m.data.line) && draftsSinceRejection >= REJECT_EVERY) {
+            draftsSinceRejection = 0
+            await producer.post("commentator", `Rejected ${e.clock}: ${context.reason}.`, { kind: "rejection", ref: e.id, data: { reason: context.reason } })
+            return
+        }
         const verdict = await producer.task(() => llmJson<{ approve?: boolean; reason?: string }>(
             "You are the producer reviewing one line of live football commentary before it is published. " +
-            "Reject it only if it is generic, misses the key context of the moment (extra time, the shootout, the scoreline, a comeback), " +
-            "states anything not in the event, or repeats a recent line. Otherwise approve. " +
+            "Be demanding but fair. Reject a draft that contradicts the facts below, or that is generic: it could describe any match, " +
+            "or it misses what makes this moment matter (the scoreline, extra time, the shootout, a comeback). " +
+            "Your reason must itself agree with the facts; never claim something the facts don't say. " +
             'Return JSON {"approve":true|false,"reason":"max 12 words, concrete fix"}.',
-            `Event: ${describe(e)} (${PERIOD[e.period]}).\nTone asked: ${m.data.tone ?? "-"}\nDraft: ${m.data.line}\nRecent lines:\n${log.slice(-5).join("\n") || "(none)"}`,
+            `${facts(e)}\nTone asked: ${m.data.tone ?? "-"}\nDraft: ${m.data.line}\nRecent lines:\n${log.slice(-5).join("\n") || "(none)"}`,
             m.data.timeoutMs ?? STEP_MS - 100,
-            { model: FAST_MODEL, maxTokens: 40, temperature: 0.2 },
+            { model: FAST_MODEL, maxTokens: 40, temperature: 0 },
         ))
         if (!verdict) return // timed out: the commentator publishes its draft
-        if (verdict.approve === false && verdict.reason)
+        // A reason that names the wrong phase of the match is itself a false fact: drop it.
+        const reason = verdict.reason ?? ""
+        const wrongPhase = (/extra[- ]time|overtime/i.test(reason) && e.period < 3) || (/shoot-?out/i.test(reason) && e.period < 5)
+        if (verdict.approve === false && reason && !wrongPhase && draftsSinceRejection >= REJECT_EVERY) {
+            draftsSinceRejection = 0
             await producer.post("commentator", `Rejected ${e.clock}: ${verdict.reason}`, { kind: "rejection", ref: e.id, data: { reason: verdict.reason } })
-        else await producer.post("commentator", `Approved ${e.clock}.`, { kind: "agreement", ref: e.id })
+        } else await producer.post("commentator", `Approved ${e.clock}.`, { kind: "agreement", ref: e.id })
     })
 }
