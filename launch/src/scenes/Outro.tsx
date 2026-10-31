@@ -22,14 +22,14 @@ function Arrow({ x1, y1, x2, y2, from, to }: { x1: number; y1: number; x2: numbe
 
 const AGENTS = ["producer", "commentator", "translator", "stats", "merch", "club-ops", "crowd", "ingest"]
 
-/** How it works: data in, a durable actor per match, the agent newsroom, fans out. */
+/** How it works: data in, durable actors per match and per fan, the agent newsroom, fans out. */
 export function HowItWorks() {
     return (
         <Scene>
             <Rise at={0} style={{ position: "absolute", left: 120, top: 90 }}><Label color={C.text} style={{ fontSize: 26 }}>How it works</Label></Rise>
             <Box x={120} y={300} w={330} h={300} at={8} title="Match data">Live events in, e.g. StatsBomb</Box>
-            <Box x={530} y={260} w={380} h={380} at={22} title="Terse durable actor">
-                One per match. Score, feeds, roster and stock <span style={{ color: C.accent }}>survive any restart</span>.
+            <Box x={530} y={260} w={380} h={380} at={22} title="Terse durable actors">
+                One per match, and one per fan. Score, stock and every fan's memory <span style={{ color: C.accent }}>survive any restart</span>.
             </Box>
             <Box x={990} y={250} w={480} h={400} at={36} title="AI newsroom · Agent Relay" accent>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px 20px", fontSize: 26, color: C.muted }}>
@@ -37,7 +37,10 @@ export function HowItWorks() {
                 </div>
                 <div style={{ marginTop: 22, fontSize: 26, lineHeight: 1.4 }}>Directs, drafts, rejects, negotiates, and <span style={{ color: C.accent }}>hires new agents live</span>.</div>
             </Box>
-            <Box x={1550} y={300} w={300} h={300} at={50} title="Fans">Web embed and React Native, in 8 languages</Box>
+            <Box x={1550} y={250} w={300} h={400} at={50} title="Fans">
+                Web embed and React Native, in 8 languages.
+                <div style={{ marginTop: 16, fontSize: 26, color: C.muted }}>A personal agent per fan, <span style={{ color: C.text }}>each its own durable actor</span>.</div>
+            </Box>
             <Arrow x1={452} y1={450} x2={526} y2={450} from={18} to={30} />
             <Arrow x1={912} y1={450} x2={986} y2={450} from={32} to={44} />
             <Arrow x1={1472} y1={450} x2={1546} y2={450} from={46} to={58} />

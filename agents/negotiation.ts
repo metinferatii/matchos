@@ -26,15 +26,20 @@ type Row = { player: string; team: string; stock: number; max_discount_pct: numb
 const toItem = (r: Row): InventoryItem => ({ player: r.player, team: r.team, stock: r.stock, maxDiscountPct: r.max_discount_pct, bundles: r.bundles ?? [] })
 const toRow = (i: InventoryItem) => ({ player: i.player, team: i.team, stock: i.stock, max_discount_pct: i.maxDiscountPct, bundles: i.bundles })
 
+// club-ops' working copy of the rules, so a goal's negotiations don't queue behind the match actor.
+// The actor's persisted stock is the source of truth; this copy is refreshed from it on start and sale.
+let cache: Record<string, InventoryItem> | null = null
+const inventory = async () => (cache ??= await room.getInventory())
+
 /** Loads the inventory from Supabase into the actor (the actor's cached stock wins after a restart). */
 export async function loadInventory() {
     const rows = await supabase.select<Row>("inventory", "select=player,team,stock,max_discount_pct,bundles")
-    await room.setInventory(rows?.length ? rows.map(toItem) : SEED)
+    cache = await room.setInventory(rows?.length ? rows.map(toItem) : SEED)
 }
 
 /** Back to the seeded stock, in the actor and in Supabase (used on replay reset). */
 export async function reseedInventory() {
-    await room.setInventory(SEED, true)
+    cache = await room.setInventory(SEED, true)
     await supabase.upsert("inventory", SEED.map(i => ({ ...toRow(i), updated_at: new Date().toISOString() })))
 }
 
@@ -66,7 +71,7 @@ export function startClubOps(clubOps: Member) {
         // Merch, and fans' own agents negotiating personal offers.
         if (!(m.from === "merch" || m.from.startsWith("fan-")) || m.kind !== "proposal") return
         const t = m.data as Terms
-        const inv = (await room.getInventory())[t.player]
+        const inv = (await inventory())[t.player]
         const reply = (kind: "agreement" | "counter" | "rejection", text: string, data?: unknown) => clubOps.post(m.from, text, { kind, ref: m.ref, data })
         if (!inv) return reply("agreement", `No rules on file for ${t.player}. Approved: ${describeTerms(t)}.`, t)
         if (t.item === "jersey" && inv.stock <= LOW_STOCK) {
@@ -90,8 +95,8 @@ export function startClubOps(clubOps: Member) {
  * Proposes an offer for a goal to club-ops, handles one counter round, and falls back to a safe default.
  * Used by merch (the general offer) and by fans' own agents (a personal one, starting from `start`).
  */
-export async function negotiateOffer(merch: Member, e: MatchEvent, start?: Partial<Terms>): Promise<Offer | null> {
-    const deadline = Date.now() + STEP_MS
+export async function negotiateOffer(merch: Member, e: MatchEvent, start?: Partial<Terms>, windowMs = STEP_MS): Promise<Offer | null> {
+    const deadline = Date.now() + windowMs
     let terms: Terms = { player: e.player!, team: e.team!, item: "jersey", discountPct: 20, ...start }
     for (let round = 1; round <= 2; round++) {
         const ref = `${e.id}-${merch.name}-${round}`
@@ -125,6 +130,7 @@ export async function recordSale(clubOps: Member, offer: Offer) {
     if (!/jersey/i.test(offer.title)) return
     const stock = await room.decrementStock(offer.player)
     if (stock === null) return
+    if (cache?.[offer.player]) cache = { ...cache, [offer.player]: { ...cache[offer.player], stock } }
     await supabase.patch("inventory", `player=eq.${encodeURIComponent(offer.player)}`, { stock, updated_at: new Date().toISOString() })
     await clubOps.post("all", `Stock update: ${offer.player} jerseys, ${stock} left.`, { kind: "note" })
 }

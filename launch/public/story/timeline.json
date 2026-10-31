@@ -1,0 +1,126 @@
+{
+  "durationS": 90.19,
+  "run": "6bwc",
+  "beats": [
+    {
+      "t": 0.8,
+      "id": "open",
+      "label": "Arta in Tirana and Diego in Buenos Aires open the club app; Sam in London is on the club's match page",
+      "surfaces": [
+        "arta",
+        "diego",
+        "sam"
+      ]
+    },
+    {
+      "t": 7.65,
+      "id": "picks",
+      "label": "Arta picks Messi, Diego picks Di María",
+      "surfaces": [
+        "arta",
+        "diego"
+      ]
+    },
+    {
+      "t": 16.49,
+      "id": "goal-messi",
+      "label": "Messi scores. Every surface updates; Arta's agent says she called it, Diego's says something else",
+      "surfaces": [
+        "arta",
+        "diego",
+        "sam",
+        "control"
+      ]
+    },
+    {
+      "t": 19.01,
+      "id": "agents-negotiate",
+      "label": "Arta's agent negotiates a personal offer with club-ops",
+      "surfaces": [
+        "control",
+        "arta"
+      ]
+    },
+    {
+      "t": 22.51,
+      "id": "arta-buys",
+      "label": "Arta buys the offer her agent got her",
+      "surfaces": [
+        "arta"
+      ]
+    },
+    {
+      "t": 26.23,
+      "id": "sam-asks",
+      "label": "Sam asks the match a question on the club site",
+      "surfaces": [
+        "sam"
+      ]
+    },
+    {
+      "t": 33.2,
+      "id": "goal-dimaria",
+      "label": "Di María scores. Now it's Diego who called it",
+      "surfaces": [
+        "diego",
+        "arta",
+        "control"
+      ]
+    },
+    {
+      "t": 39.72,
+      "id": "arta-leaves",
+      "label": "Arta closes the app",
+      "surfaces": [
+        "arta"
+      ]
+    },
+    {
+      "t": 48.34,
+      "id": "kenji-joins",
+      "label": "Kenji in Tokyo joins in Japanese. Nobody covers it, so the producer hires a translator",
+      "surfaces": [
+        "kenji",
+        "control"
+      ]
+    },
+    {
+      "t": 64.68,
+      "id": "arta-returns",
+      "label": "Arta comes back. Her agent tells her what she missed",
+      "surfaces": [
+        "arta"
+      ]
+    },
+    {
+      "t": 74.73,
+      "id": "kill",
+      "label": "The match server is killed at 49'",
+      "surfaces": [
+        "arta",
+        "diego",
+        "kenji",
+        "sam",
+        "control"
+      ]
+    },
+    {
+      "t": 82.69,
+      "id": "resume",
+      "label": "Back at 49': every fan, every agent, every offer resumes",
+      "surfaces": [
+        "arta",
+        "diego",
+        "kenji",
+        "sam",
+        "control"
+      ]
+    },
+    {
+      "t": 89.69,
+      "id": "end",
+      "label": "End",
+      "surfaces": []
+    }
+  ]
+}

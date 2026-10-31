@@ -133,7 +133,8 @@ merch.on(async m => {
     const e = EVENTS[m.data.eventId]
     if (!e || !isGoal(e) || !e.player) return
     if (!(await directiveFor(merch, e)).act.includes("merch")) return
-    const offer = flags.negotiation ? await merch.task(() => negotiateOffer(merch, e)) : defaultOffer(e)
+    // Offers aren't on the commentary path, so the negotiation gets a little longer than STEP_MS.
+    const offer = flags.negotiation ? await merch.task(() => negotiateOffer(merch, e, undefined, 1500)) : defaultOffer(e)
     if (!offer) return
     await room.setOffer(offer)
     await merch.post("all", `Flash offer live: ${offer.title}, €${offer.priceEur.toFixed(2)} (${offer.discountPct}% off) for 10 min.`, { data: { offer, eventId: e.id } })

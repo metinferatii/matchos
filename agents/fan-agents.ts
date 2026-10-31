@@ -28,14 +28,16 @@ async function publish(fan: Fan) {
     }).catch(() => {})
 }
 
-/** Runs work with this fan's agent shown as working in the control room. */
+/** Runs a piece of this fan's agent's work. (No status round-trips: at a goal every fan's agent works at
+ * once, and the match actor's time is better spent on commentary and offers.) */
 async function task<T>(fan: Fan, fn: () => Promise<T>): Promise<T> {
-    if (++fan.busy === 1) await publish(fan)
-    try { return await fn() } finally { if (--fan.busy === 0) await publish(fan) }
+    fan.busy++
+    try { return await fn() } finally { fan.busy-- }
 }
 
+let clock = "0'"
+
 async function say(fan: Fan, text: string, logLine: string, kind: "note" | "initiative" = "initiative") {
-    const clock = (await room.getState()).clock
     await Promise.all([
         room.postPersonal(fan.userId, fan.lang, text, fan.name),
         fanActor(fan.userId).recordNote(clock, text),
@@ -77,6 +79,7 @@ async function join(userId: string, lang: FanLang, cursor: number, opts: { resto
     const { memory, isNew } = await fanActor(userId).load(userId, lang)
     let fan = fans.get(userId)
     const wasActive = fan?.active ?? !!opts.restored
+    console.log(`[fan] joined ${userId} at ${cursor} new=${isNew} wasActive=${wasActive} lastSeen=${memory.lastSeenCursor}`)
     if (!fan) {
         const name = `fan-${lang}-${shortId(userId)}`
         const member = await Member.join(name)
@@ -97,6 +100,7 @@ async function join(userId: string, lang: FanLang, cursor: number, opts: { resto
 
 export async function onFanLeft(userId: string, cursor: number) {
     const fan = fans.get(userId)
+    console.log(`[fan] left ${userId} at ${cursor}${fan ? "" : " (no agent)"}`)
     if (!fan) return
     fan.active = false
     await fanActor(userId).markSeen(cursor)
@@ -142,6 +146,7 @@ function listen(fan: Fan) {
         if (m.from === "ingest" && m.data?.eventId !== undefined) {
             const e = EVENTS[m.data.eventId]
             if (!e) return
+            clock = e.clock
             await fanActor(fan.userId).markSeen(e.id + 1)
             if (e.type === "goal") await task(fan, () => goalMoment(fan, e))
         }
@@ -176,9 +181,13 @@ async function goalMoment(fan: Fan, e: MatchEvent) {
 }
 
 async function personalOffer(fan: Fan, e: MatchEvent, general: Offer) {
-    // Their pick scored: ask club-ops for more than the general offer, plus a free name print.
-    const offer = await negotiateOffer(fan.member, e, { discountPct: general.discountPct + 5, bundle: "name print" })
-    if (!offer || offer.id === general.id) return
+    // Their pick scored: ask club-ops for more than the general offer, plus a free name print. Not on the
+    // commentary path, so it gets a longer window; and it only goes out if it beats the general offer.
+    const offer = await negotiateOffer(fan.member, e, { discountPct: general.discountPct + 5, bundle: "name print" }, 2500)
+    if (!offer || offer.id === general.id || offer.priceEur > general.priceEur || offer.title.includes("scarf") && !general.title.includes("scarf") && offer.priceEur >= general.priceEur) {
+        await fan.member.post("all", `Couldn't beat the general offer for ${fan.userId}; leaving it.`, { kind: "note" })
+        return
+    }
     await room.sendPersonalOffer(fan.userId, offer)
     const text = await phrase(fan, "Tell them in one short line (max 18 words) that because they called the scorer, you got them a personal offer.",
         `Offer: ${offer.title}, €${offer.priceEur.toFixed(2)} (${offer.discountPct}% off). The general offer was ${general.discountPct}% off.`)
