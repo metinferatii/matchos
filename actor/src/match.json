@@ -1,0 +1,1181 @@
+{
+ "id": "wc22-final",
+ "statsbombMatchId": 3869685,
+ "competition": "FIFA World Cup 2022 · Final",
+ "venue": "Lusail Stadium",
+ "home": {
+  "name": "Argentina",
+  "short": "ARG",
+  "color": "#75AADB"
+ },
+ "away": {
+  "name": "France",
+  "short": "FRA",
+  "color": "#1B2C5C"
+ },
+ "attribution": "Data: StatsBomb Open Data",
+ "events": [
+  {
+   "id": 0,
+   "minute": 0,
+   "second": 0,
+   "period": 1,
+   "team": null,
+   "player": null,
+   "location": [
+    60,
+    40
+   ],
+   "type": "kickoff",
+   "detail": "First half begins",
+   "clock": "1'",
+   "score": {
+    "home": 0,
+    "away": 0
+   }
+  },
+  {
+   "id": 1,
+   "minute": 4,
+   "second": 40,
+   "period": 1,
+   "team": "Argentina",
+   "player": "Mac Allister",
+   "location": [
+    92.4,
+    30
+   ],
+   "type": "shot_saved",
+   "detail": "Shot saved",
+   "score": {
+    "home": 0,
+    "away": 0
+   },
+   "clock": "5'"
+  },
+  {
+   "id": 2,
+   "minute": 16,
+   "second": 15,
+   "period": 1,
+   "team": "Argentina",
+   "player": "Di María",
+   "location": [
+    103.1,
+    34.6
+   ],
+   "type": "shot_missed",
+   "detail": "Shot off target",
+   "score": {
+    "home": 0,
+    "away": 0
+   },
+   "clock": "17'"
+  },
+  {
+   "id": 3,
+   "minute": 20,
+   "second": 53,
+   "period": 1,
+   "team": "France",
+   "player": "Dembélé",
+   "location": [
+    7.5,
+    59.2
+   ],
+   "type": "penalty_awarded",
+   "detail": "Foul in the box, penalty awarded",
+   "clock": "21'",
+   "score": {
+    "home": 0,
+    "away": 0
+   }
+  },
+  {
+   "id": 4,
+   "minute": 22,
+   "second": 24,
+   "period": 1,
+   "team": "Argentina",
+   "player": "Messi",
+   "location": [
+    108,
+    40
+   ],
+   "type": "goal",
+   "detail": "Penalty goal",
+   "score": {
+    "home": 1,
+    "away": 0
+   },
+   "clock": "23'"
+  },
+  {
+   "id": 5,
+   "minute": 35,
+   "second": 22,
+   "period": 1,
+   "team": "Argentina",
+   "player": "Di María",
+   "location": [
+    111.8,
+    32.1
+   ],
+   "type": "goal",
+   "detail": "Goal (left foot)",
+   "score": {
+    "home": 2,
+    "away": 0
+   },
+   "clock": "36'"
+  },
+  {
+   "id": 6,
+   "minute": 40,
+   "second": 32,
+   "period": 1,
+   "team": "France",
+   "player": "Dembélé",
+   "location": null,
+   "type": "substitution",
+   "detail": "Kolo Muani replaces Dembélé",
+   "clock": "41'",
+   "score": {
+    "home": 2,
+    "away": 0
+   }
+  },
+  {
+   "id": 7,
+   "minute": 41,
+   "second": 1,
+   "period": 1,
+   "team": "France",
+   "player": "Giroud",
+   "location": null,
+   "type": "substitution",
+   "detail": "Thuram replaces Giroud",
+   "clock": "42'",
+   "score": {
+    "home": 2,
+    "away": 0
+   }
+  },
+  {
+   "id": 8,
+   "minute": 51,
+   "second": 21,
+   "period": 1,
+   "team": "Argentina",
+   "player": "Enzo Fernández",
+   "location": [
+    48.8,
+    4.9
+   ],
+   "type": "yellow_card",
+   "detail": "Yellow Card",
+   "clock": "45+7'",
+   "score": {
+    "home": 2,
+    "away": 0
+   }
+  },
+  {
+   "id": 9,
+   "minute": 52,
+   "second": 34,
+   "period": 1,
+   "team": null,
+   "player": null,
+   "location": null,
+   "type": "half_end",
+   "detail": "First half ends",
+   "clock": "45+8'",
+   "score": {
+    "home": 2,
+    "away": 0
+   }
+  },
+  {
+   "id": 10,
+   "minute": 45,
+   "second": 0,
+   "period": 2,
+   "team": null,
+   "player": null,
+   "location": [
+    60,
+    40
+   ],
+   "type": "kickoff",
+   "detail": "Second half begins",
+   "clock": "46'",
+   "score": {
+    "home": 2,
+    "away": 0
+   }
+  },
+  {
+   "id": 11,
+   "minute": 48,
+   "second": 49,
+   "period": 2,
+   "team": "Argentina",
+   "player": "De Paul",
+   "location": [
+    103.3,
+    52.3
+   ],
+   "type": "shot_saved",
+   "detail": "Shot saved",
+   "score": {
+    "home": 2,
+    "away": 0
+   },
+   "clock": "49'"
+  },
+  {
+   "id": 12,
+   "minute": 54,
+   "second": 12,
+   "period": 2,
+   "team": "France",
+   "player": "Rabiot",
+   "location": [
+    74.5,
+    3.6
+   ],
+   "type": "yellow_card",
+   "detail": "Yellow Card",
+   "clock": "55'",
+   "score": {
+    "home": 2,
+    "away": 0
+   }
+  },
+  {
+   "id": 13,
+   "minute": 58,
+   "second": 21,
+   "period": 2,
+   "team": "Argentina",
+   "player": "Julián Álvarez",
+   "location": [
+    110.5,
+    24.9
+   ],
+   "type": "shot_saved",
+   "detail": "Shot saved",
+   "score": {
+    "home": 2,
+    "away": 0
+   },
+   "clock": "59'"
+  },
+  {
+   "id": 14,
+   "minute": 59,
+   "second": 51,
+   "period": 2,
+   "team": "Argentina",
+   "player": "Messi",
+   "location": [
+    109.7,
+    46
+   ],
+   "type": "shot_missed",
+   "detail": "Shot off target",
+   "score": {
+    "home": 2,
+    "away": 0
+   },
+   "clock": "60'"
+  },
+  {
+   "id": 15,
+   "minute": 63,
+   "second": 51,
+   "period": 2,
+   "team": "Argentina",
+   "player": "Di María",
+   "location": null,
+   "type": "substitution",
+   "detail": "Acuña replaces Di María",
+   "clock": "64'",
+   "score": {
+    "home": 2,
+    "away": 0
+   }
+  },
+  {
+   "id": 16,
+   "minute": 67,
+   "second": 15,
+   "period": 2,
+   "team": "France",
+   "player": "Kolo Muani",
+   "location": [
+    113.4,
+    34.6
+   ],
+   "type": "shot_missed",
+   "detail": "Shot off target",
+   "score": {
+    "home": 2,
+    "away": 0
+   },
+   "clock": "68'"
+  },
+  {
+   "id": 17,
+   "minute": 70,
+   "second": 27,
+   "period": 2,
+   "team": "France",
+   "player": "Theo Hernández",
+   "location": null,
+   "type": "substitution",
+   "detail": "Camavinga replaces Theo Hernández",
+   "clock": "71'",
+   "score": {
+    "home": 2,
+    "away": 0
+   }
+  },
+  {
+   "id": 18,
+   "minute": 70,
+   "second": 29,
+   "period": 2,
+   "team": "France",
+   "player": "Griezmann",
+   "location": null,
+   "type": "substitution",
+   "detail": "Coman replaces Griezmann",
+   "clock": "71'",
+   "score": {
+    "home": 2,
+    "away": 0
+   }
+  },
+  {
+   "id": 19,
+   "minute": 71,
+   "second": 31,
+   "period": 2,
+   "team": "Argentina",
+   "player": "Enzo Fernández",
+   "location": [
+    98.9,
+    32.2
+   ],
+   "type": "shot_saved",
+   "detail": "Shot saved",
+   "score": {
+    "home": 2,
+    "away": 0
+   },
+   "clock": "72'"
+  },
+  {
+   "id": 20,
+   "minute": 78,
+   "second": 13,
+   "period": 2,
+   "team": "Argentina",
+   "player": "Otamendi",
+   "location": [
+    12.7,
+    56.9
+   ],
+   "type": "penalty_awarded",
+   "detail": "Foul in the box, penalty awarded",
+   "clock": "79'",
+   "score": {
+    "home": 2,
+    "away": 0
+   }
+  },
+  {
+   "id": 21,
+   "minute": 79,
+   "second": 24,
+   "period": 2,
+   "team": "France",
+   "player": "Mbappé",
+   "location": [
+    108,
+    40
+   ],
+   "type": "goal",
+   "detail": "Penalty goal",
+   "score": {
+    "home": 2,
+    "away": 1
+   },
+   "clock": "80'"
+  },
+  {
+   "id": 22,
+   "minute": 80,
+   "second": 59,
+   "period": 2,
+   "team": "France",
+   "player": "Mbappé",
+   "location": [
+    104.8,
+    30.1
+   ],
+   "type": "goal",
+   "detail": "Goal (right foot)",
+   "score": {
+    "home": 2,
+    "away": 2
+   },
+   "clock": "81'"
+  },
+  {
+   "id": 23,
+   "minute": 86,
+   "second": 24,
+   "period": 2,
+   "team": "France",
+   "player": "Thuram",
+   "location": [
+    106.6,
+    27.3
+   ],
+   "type": "yellow_card",
+   "detail": "Yellow Card",
+   "clock": "87'",
+   "score": {
+    "home": 2,
+    "away": 2
+   }
+  },
+  {
+   "id": 24,
+   "minute": 93,
+   "second": 45,
+   "period": 2,
+   "team": "France",
+   "player": "Rabiot",
+   "location": [
+    108.9,
+    28.5
+   ],
+   "type": "shot_saved",
+   "detail": "Shot saved",
+   "score": {
+    "home": 2,
+    "away": 2
+   },
+   "clock": "90+4'"
+  },
+  {
+   "id": 25,
+   "minute": 94,
+   "second": 35,
+   "period": 2,
+   "team": "France",
+   "player": "Giroud",
+   "location": null,
+   "type": "yellow_card",
+   "detail": "Yellow Card",
+   "clock": "90+5'",
+   "score": {
+    "home": 2,
+    "away": 2
+   }
+  },
+  {
+   "id": 26,
+   "minute": 96,
+   "second": 37,
+   "period": 2,
+   "team": "Argentina",
+   "player": "Messi",
+   "location": [
+    96.2,
+    40.9
+   ],
+   "type": "shot_saved",
+   "detail": "Shot saved",
+   "score": {
+    "home": 2,
+    "away": 2
+   },
+   "clock": "90+7'"
+  },
+  {
+   "id": 27,
+   "minute": 97,
+   "second": 33,
+   "period": 2,
+   "team": "Argentina",
+   "player": "Acuña",
+   "location": [
+    93.7,
+    29.7
+   ],
+   "type": "yellow_card",
+   "detail": "Yellow Card",
+   "clock": "90+8'",
+   "score": {
+    "home": 2,
+    "away": 2
+   }
+  },
+  {
+   "id": 28,
+   "minute": 98,
+   "second": 37,
+   "period": 2,
+   "team": null,
+   "player": null,
+   "location": null,
+   "type": "half_end",
+   "detail": "Second half ends",
+   "clock": "90+9'",
+   "score": {
+    "home": 2,
+    "away": 2
+   }
+  },
+  {
+   "id": 29,
+   "minute": 90,
+   "second": 0,
+   "period": 3,
+   "team": null,
+   "player": null,
+   "location": [
+    60,
+    40
+   ],
+   "type": "kickoff",
+   "detail": "Extra time, first half begins",
+   "clock": "91'",
+   "score": {
+    "home": 2,
+    "away": 2
+   }
+  },
+  {
+   "id": 30,
+   "minute": 90,
+   "second": 0,
+   "period": 3,
+   "team": "Argentina",
+   "player": "Molina",
+   "location": null,
+   "type": "substitution",
+   "detail": "Montiel replaces Molina",
+   "clock": "91'",
+   "score": {
+    "home": 2,
+    "away": 2
+   }
+  },
+  {
+   "id": 31,
+   "minute": 95,
+   "second": 10,
+   "period": 3,
+   "team": "France",
+   "player": "Rabiot",
+   "location": null,
+   "type": "substitution",
+   "detail": "Fofana replaces Rabiot",
+   "clock": "96'",
+   "score": {
+    "home": 2,
+    "away": 2
+   }
+  },
+  {
+   "id": 32,
+   "minute": 101,
+   "second": 37,
+   "period": 3,
+   "team": "Argentina",
+   "player": "De Paul",
+   "location": null,
+   "type": "substitution",
+   "detail": "Paredes replaces De Paul",
+   "clock": "102'",
+   "score": {
+    "home": 2,
+    "away": 2
+   }
+  },
+  {
+   "id": 33,
+   "minute": 101,
+   "second": 49,
+   "period": 3,
+   "team": "Argentina",
+   "player": "Julián Álvarez",
+   "location": null,
+   "type": "substitution",
+   "detail": "Lautaro Martínez replaces Julián Álvarez",
+   "clock": "102'",
+   "score": {
+    "home": 2,
+    "away": 2
+   }
+  },
+  {
+   "id": 34,
+   "minute": 105,
+   "second": 41,
+   "period": 3,
+   "team": "Argentina",
+   "player": "Lautaro Martínez",
+   "location": [
+    105.1,
+    33.5
+   ],
+   "type": "shot_missed",
+   "detail": "Shot off target",
+   "score": {
+    "home": 2,
+    "away": 2
+   },
+   "clock": "105+1'"
+  },
+  {
+   "id": 35,
+   "minute": 106,
+   "second": 4,
+   "period": 3,
+   "team": null,
+   "player": null,
+   "location": null,
+   "type": "half_end",
+   "detail": "Extra time, first half ends",
+   "clock": "105+2'",
+   "score": {
+    "home": 2,
+    "away": 2
+   }
+  },
+  {
+   "id": 36,
+   "minute": 105,
+   "second": 0,
+   "period": 4,
+   "team": null,
+   "player": null,
+   "location": [
+    60,
+    40
+   ],
+   "type": "kickoff",
+   "detail": "Extra time, second half begins",
+   "clock": "106'",
+   "score": {
+    "home": 2,
+    "away": 2
+   }
+  },
+  {
+   "id": 37,
+   "minute": 106,
+   "second": 55,
+   "period": 4,
+   "team": "Argentina",
+   "player": "Messi",
+   "location": [
+    103.6,
+    55.8
+   ],
+   "type": "shot_saved",
+   "detail": "Shot saved",
+   "score": {
+    "home": 2,
+    "away": 2
+   },
+   "clock": "107'"
+  },
+  {
+   "id": 38,
+   "minute": 107,
+   "second": 57,
+   "period": 4,
+   "team": "Argentina",
+   "player": "Lautaro Martínez",
+   "location": [
+    114.4,
+    52
+   ],
+   "type": "shot_saved",
+   "detail": "Shot saved",
+   "score": {
+    "home": 2,
+    "away": 2
+   },
+   "clock": "108'"
+  },
+  {
+   "id": 39,
+   "minute": 107,
+   "second": 58,
+   "period": 4,
+   "team": "Argentina",
+   "player": "Messi",
+   "location": [
+    116.6,
+    43
+   ],
+   "type": "goal",
+   "detail": "Goal (right foot)",
+   "score": {
+    "home": 3,
+    "away": 2
+   },
+   "clock": "108'"
+  },
+  {
+   "id": 40,
+   "minute": 112,
+   "second": 28,
+   "period": 4,
+   "team": "France",
+   "player": "Varane",
+   "location": null,
+   "type": "substitution",
+   "detail": "Konaté replaces Varane",
+   "clock": "113'",
+   "score": {
+    "home": 3,
+    "away": 2
+   }
+  },
+  {
+   "id": 41,
+   "minute": 113,
+   "second": 27,
+   "period": 4,
+   "team": "Argentina",
+   "player": "Paredes",
+   "location": [
+    45.8,
+    66
+   ],
+   "type": "yellow_card",
+   "detail": "Yellow Card",
+   "clock": "114'",
+   "score": {
+    "home": 3,
+    "away": 2
+   }
+  },
+  {
+   "id": 42,
+   "minute": 115,
+   "second": 22,
+   "period": 4,
+   "team": "Argentina",
+   "player": "Mac Allister",
+   "location": null,
+   "type": "substitution",
+   "detail": "Pezzella replaces Mac Allister",
+   "clock": "116'",
+   "score": {
+    "home": 3,
+    "away": 2
+   }
+  },
+  {
+   "id": 43,
+   "minute": 115,
+   "second": 39,
+   "period": 4,
+   "team": "Argentina",
+   "player": "Montiel",
+   "location": [
+    14.8,
+    52.1
+   ],
+   "type": "yellow_card",
+   "detail": "Yellow Card",
+   "clock": "116'",
+   "score": {
+    "home": 3,
+    "away": 2
+   }
+  },
+  {
+   "id": 44,
+   "minute": 117,
+   "second": 5,
+   "period": 4,
+   "team": "Argentina",
+   "player": "Montiel",
+   "location": [
+    108,
+    40
+   ],
+   "type": "penalty_awarded",
+   "detail": "Handball in the box, penalty awarded",
+   "score": {
+    "home": 3,
+    "away": 2
+   },
+   "clock": "118'"
+  },
+  {
+   "id": 45,
+   "minute": 117,
+   "second": 5,
+   "period": 4,
+   "team": "France",
+   "player": "Mbappé",
+   "location": [
+    108,
+    40
+   ],
+   "type": "goal",
+   "detail": "Penalty goal",
+   "score": {
+    "home": 3,
+    "away": 3
+   },
+   "clock": "118'"
+  },
+  {
+   "id": 46,
+   "minute": 120,
+   "second": 35,
+   "period": 4,
+   "team": "France",
+   "player": "Koundé",
+   "location": null,
+   "type": "substitution",
+   "detail": "Disasi replaces Koundé",
+   "clock": "120+1'",
+   "score": {
+    "home": 3,
+    "away": 3
+   }
+  },
+  {
+   "id": 47,
+   "minute": 120,
+   "second": 46,
+   "period": 4,
+   "team": "Argentina",
+   "player": "Tagliafico",
+   "location": null,
+   "type": "substitution",
+   "detail": "Dybala replaces Tagliafico",
+   "clock": "120+1'",
+   "score": {
+    "home": 3,
+    "away": 3
+   }
+  },
+  {
+   "id": 48,
+   "minute": 122,
+   "second": 44,
+   "period": 4,
+   "team": "France",
+   "player": "Kolo Muani",
+   "location": [
+    103.7,
+    45.1
+   ],
+   "type": "shot_saved",
+   "detail": "Shot saved",
+   "score": {
+    "home": 3,
+    "away": 3
+   },
+   "clock": "120+3'"
+  },
+  {
+   "id": 49,
+   "minute": 122,
+   "second": 59,
+   "period": 4,
+   "team": "Argentina",
+   "player": "Lautaro Martínez",
+   "location": [
+    110.8,
+    41.6
+   ],
+   "type": "shot_missed",
+   "detail": "Shot off target",
+   "score": {
+    "home": 3,
+    "away": 3
+   },
+   "clock": "120+3'"
+  },
+  {
+   "id": 50,
+   "minute": 124,
+   "second": 7,
+   "period": 4,
+   "team": null,
+   "player": null,
+   "location": null,
+   "type": "half_end",
+   "detail": "Extra time, second half ends",
+   "clock": "120+5'",
+   "score": {
+    "home": 3,
+    "away": 3
+   }
+  },
+  {
+   "id": 51,
+   "minute": 120,
+   "second": 0,
+   "period": 5,
+   "team": null,
+   "player": null,
+   "location": [
+    60,
+    40
+   ],
+   "type": "shootout_start",
+   "detail": "Penalty shootout begins",
+   "clock": "PENS",
+   "score": {
+    "home": 3,
+    "away": 3
+   },
+   "shootout": {
+    "home": 0,
+    "away": 0
+   }
+  },
+  {
+   "id": 52,
+   "minute": 120,
+   "second": 13,
+   "period": 5,
+   "team": "France",
+   "player": "Mbappé",
+   "location": [
+    108.1,
+    40.1
+   ],
+   "type": "shootout_goal",
+   "detail": "Scores in the shootout",
+   "score": {
+    "home": 3,
+    "away": 3
+   },
+   "shootout": {
+    "home": 0,
+    "away": 1
+   },
+   "clock": "PENS"
+  },
+  {
+   "id": 53,
+   "minute": 121,
+   "second": 2,
+   "period": 5,
+   "team": "Argentina",
+   "player": "Messi",
+   "location": [
+    108.1,
+    40.1
+   ],
+   "type": "shootout_goal",
+   "detail": "Scores in the shootout",
+   "score": {
+    "home": 3,
+    "away": 3
+   },
+   "shootout": {
+    "home": 1,
+    "away": 1
+   },
+   "clock": "PENS"
+  },
+  {
+   "id": 54,
+   "minute": 121,
+   "second": 42,
+   "period": 5,
+   "team": "France",
+   "player": "Coman",
+   "location": [
+    108.1,
+    40.1
+   ],
+   "type": "shootout_miss",
+   "detail": "Shootout kick saved",
+   "score": {
+    "home": 3,
+    "away": 3
+   },
+   "shootout": {
+    "home": 1,
+    "away": 1
+   },
+   "clock": "PENS"
+  },
+  {
+   "id": 55,
+   "minute": 122,
+   "second": 27,
+   "period": 5,
+   "team": "Argentina",
+   "player": "Dybala",
+   "location": [
+    108.1,
+    40.1
+   ],
+   "type": "shootout_goal",
+   "detail": "Scores in the shootout",
+   "score": {
+    "home": 3,
+    "away": 3
+   },
+   "shootout": {
+    "home": 2,
+    "away": 1
+   },
+   "clock": "PENS"
+  },
+  {
+   "id": 56,
+   "minute": 123,
+   "second": 29,
+   "period": 5,
+   "team": "France",
+   "player": "Tchouaméni",
+   "location": [
+    108.1,
+    40.1
+   ],
+   "type": "shootout_miss",
+   "detail": "Shootout kick missed",
+   "score": {
+    "home": 3,
+    "away": 3
+   },
+   "shootout": {
+    "home": 2,
+    "away": 1
+   },
+   "clock": "PENS"
+  },
+  {
+   "id": 57,
+   "minute": 124,
+   "second": 16,
+   "period": 5,
+   "team": "Argentina",
+   "player": "Paredes",
+   "location": [
+    108.1,
+    40.1
+   ],
+   "type": "shootout_goal",
+   "detail": "Scores in the shootout",
+   "score": {
+    "home": 3,
+    "away": 3
+   },
+   "shootout": {
+    "home": 3,
+    "away": 1
+   },
+   "clock": "PENS"
+  },
+  {
+   "id": 58,
+   "minute": 124,
+   "second": 57,
+   "period": 5,
+   "team": "Argentina",
+   "player": "Emiliano Martínez",
+   "location": null,
+   "type": "yellow_card",
+   "detail": "Yellow Card",
+   "clock": "PENS",
+   "score": {
+    "home": 3,
+    "away": 3
+   },
+   "shootout": {
+    "home": 3,
+    "away": 1
+   }
+  },
+  {
+   "id": 59,
+   "minute": 125,
+   "second": 9,
+   "period": 5,
+   "team": "France",
+   "player": "Kolo Muani",
+   "location": [
+    108.1,
+    40.1
+   ],
+   "type": "shootout_goal",
+   "detail": "Scores in the shootout",
+   "score": {
+    "home": 3,
+    "away": 3
+   },
+   "shootout": {
+    "home": 3,
+    "away": 2
+   },
+   "clock": "PENS"
+  },
+  {
+   "id": 60,
+   "minute": 125,
+   "second": 57,
+   "period": 5,
+   "team": "Argentina",
+   "player": "Montiel",
+   "location": [
+    108.1,
+    40.1
+   ],
+   "type": "shootout_goal",
+   "detail": "Scores in the shootout",
+   "score": {
+    "home": 3,
+    "away": 3
+   },
+   "shootout": {
+    "home": 4,
+    "away": 2
+   },
+   "clock": "PENS"
+  },
+  {
+   "id": 61,
+   "minute": 125,
+   "second": 58,
+   "period": 5,
+   "team": null,
+   "player": null,
+   "location": null,
+   "type": "full_time",
+   "detail": "Penalty shootout ends",
+   "clock": "PENS",
+   "score": {
+    "home": 3,
+    "away": 3
+   },
+   "shootout": {
+    "home": 4,
+    "away": 2
+   }
+  }
+ ]
+}

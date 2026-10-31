@@ -1,0 +1,6 @@
+{
+  "name": "relay-engine-local",
+  "private": true,
+  "dependencies": { "@relaycast/engine": "11.1.0" },
+  "overrides": { "better-sqlite3": "^12.4.1" }
+}

@@ -1,0 +1,7 @@
+node_modules/
+.env
+.env.*
+.relay-engine/node_modules/
+.relay-engine/package-lock.json
+.relay-data/
+!.env.example

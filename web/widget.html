@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Live match centre</title>
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="widget.css">
+</head>
+<body>
+<main class="w" id="w" aria-live="off">
+  <header class="bug" id="bug">
+    <div class="bug-row">
+      <div class="side home" id="homeSide">
+        <span class="flag" id="homeFlag"></span>
+        <span class="tname"><b id="homeCode">ARG</b><span id="homeName">Argentina</span></span>
+      </div>
+      <div class="center">
+        <div class="score" aria-label="score">
+          <span class="n" id="homeScore">0</span>
+          <span class="dash">–</span>
+          <span class="n" id="awayScore">0</span>
+        </div>
+        <div class="clock"><span class="dot" id="liveDot"></span><span id="minute">–</span></div>
+      </div>
+      <div class="side away" id="awaySide">
+        <span class="tname"><b id="awayCode">FRA</b><span id="awayName">France</span></span>
+        <span class="flag" id="awayFlag"></span>
+      </div>
+    </div>
+    <div class="pens" id="pens" hidden>
+      <span id="pensLabel">Penalties</span>
+      <span class="pens-score"><b id="pensHome">0</b> – <b id="pensAway">0</b></span>
+    </div>
+    <div class="conn" id="conn" hidden><span class="spin"></span><span id="connText">Reconnecting…</span></div>
+    <div class="goalwipe" id="goalwipe" aria-hidden="true">
+      <span class="gw-word" id="gwWord">GOAL</span>
+      <span class="gw-who" id="gwWho"></span>
+    </div>
+  </header>
+
+  <div class="body">
+    <section class="feedcol">
+      <h2 class="sec-title"><span class="live-tag" id="feedTitle">Live</span><span class="sec-sub" id="feedSub"></span></h2>
+      <ol class="feed" id="feed"></ol>
+      <form class="ask" id="askForm" autocomplete="off">
+        <input id="askInput" maxlength="300" placeholder="Ask anything about this match" aria-label="Ask the match">
+        <button type="submit" id="askBtn">Ask</button>
+      </form>
+    </section>
+
+    <section class="predict" id="predict">
+      <h2 class="sec-title"><span id="predictTitle">Who scores next?</span><span class="sec-sub" id="voteCount"></span></h2>
+      <p class="hint" id="predictHint">Tap a player to make your call.</p>
+      <div class="teams" id="voteTeams"></div>
+    </section>
+  </div>
+
+  <footer class="foot">
+    <span id="poweredBy">Powered by <b>Matchday OS</b></span>
+    <span class="sep"></span>
+    <span>Data: StatsBomb Open Data</span>
+  </footer>
+
+  <div class="sheet-wrap" id="sheetWrap" hidden>
+    <div class="sheet" id="sheet" role="dialog" aria-modal="false" aria-labelledby="offerTitle">
+      <div class="sheet-top">
+        <span class="flash-tag" id="flashTag">Flash offer</span>
+        <span class="countdown"><span id="endsIn">Ends in</span> <b id="countdown">0:00</b></span>
+      </div>
+      <div class="sheet-main">
+        <div class="jersey" id="jersey"></div>
+        <div class="offer-info">
+          <h3 id="offerTitle" dir="auto">Jersey</h3>
+          <div class="price">
+            <span class="now" id="priceNow">€0</span>
+            <s class="was" id="priceWas">€0</s>
+            <span class="off" id="priceOff">-0%</span>
+            <span class="mini-count" id="miniCount"></span>
+          </div>
+          <div class="sheet-actions" id="sheetActions">
+            <button class="buy" id="buyBtn" type="button">Buy now</button>
+            <button class="later" id="laterBtn" type="button">Not now</button>
+          </div>
+          <p class="confirm" id="confirm" hidden></p>
+        </div>
+      </div>
+      <div class="timebar"><span id="timebar"></span></div>
+    </div>
+  </div>
+</main>
+<script src="widget.js"></script>
+</body>
+</html>
