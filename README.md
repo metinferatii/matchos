@@ -4,6 +4,19 @@ A personal AI agent for every fan, from one script tag. Any club gets a live, mu
 
 Data: StatsBomb Open Data (2022 World Cup final, Argentina v France).
 
+## What's in this repo
+
+| Folder | What |
+|---|---|
+| `actor/` | Terse durable actors: `MatchRoom` (one per match) and `FanAgent` (one per fan) |
+| `agents/` | The AI newsroom and the per-fan agents on Agent Relay |
+| `gateway/` | The fans' entry point: handshake, WebSocket proxy, control API |
+| `web/` | Web frontend: the embeddable widget, a club match page, the control room |
+| `mobile/` | React Native app (Expo) with the Matchday OS SDK component, by @yasiridriz |
+| `shared/`, `data/` | The message contract and the match data |
+| `supabase/` | Database schema |
+| `mock/`, `scripts/`, `demo/` | Client mock server, tests and rehearsals, demo recorders |
+
 ## Run it
 
 Requires Bun ≥ 1.4.2 and Node 22/24 (for the local Agent Relay server).
@@ -21,7 +34,13 @@ Run `supabase/schema.sql` once in the Supabase SQL editor (orders, match archive
 - Control room: http://localhost:8080/control.html (Space start/pause, G next goal, Shift+R reset, "Add a fan", Leave/Return per phone)
 - Club match page with the embed: http://localhost:8080/club.html
 - Embed: `<script src="http://HOST:8080/embed.js" data-match="wc22-final" data-lang="sq"></script>` (en, sq, es, ar, ja, fr, de, tr; optional `data-theme="light"`, `data-accent`)
-- React Native: [matchos-rn](https://github.com/yasiridriz/matchos-rn) with `EXPO_PUBLIC_WS_URL=ws://<laptop-ip>:8080/ws`
+- React Native app (`mobile/`): with the backend running, point it at your laptop and start Expo:
+
+  ```bash
+  cd mobile && npm install
+  echo "EXPO_PUBLIC_WS_URL=ws://$(ipconfig getifaddr en0):8080/ws" > .env
+  npx expo start -c        # scan the QR code with Expo Go, or press w for the web build
+  ```
 
 Replay control: `curl -XPOST "localhost:8080/api/control?action=start&value=4000"` (also `pause`, `reset`, `speed&value=ms`, `jump&value=<event index>`). Use **4 s per event** for demos: the agents' time budgets scale with it.
 
@@ -83,7 +102,7 @@ StatsBomb → data/match.json (62 key events)
 
 - `shared/contract.ts` is the message contract shared with the React Native app (only optional fields are ever added). `./scripts/sync-shared.sh` copies it and the data into `actor/src`.
 - Terse reserves the `state` socket message type, so the actor sends `room_state` and the gateway renames it.
-- `mock/server.ts` is a contract-compatible mock for client development; `scripts/rn-compat.ts <path-to-matchos-rn>` checks the live backend with the RN SDK's own parser.
+- `mock/server.ts` is a contract-compatible mock for client development; `bun scripts/rn-compat.ts mobile` checks the live backend with the RN SDK's own parser.
 
 ## Testing and recording
 
