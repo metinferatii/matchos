@@ -17,3 +17,6 @@ data/raw/
 
 # Demo recordings
 demo/out/
+
+# Launch video project (kept local)
+launch/
