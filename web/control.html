@@ -16,8 +16,8 @@
       <span class="match"><span id="tHome">Argentina</span> <span class="tscore" id="tScore"><span id="tHs">0</span>–<span id="tAs">0</span></span> <span id="tAway">France</span></span>
       <span class="sep">·</span><span id="tMin">Pre-match</span><span id="tPens" hidden></span>
       <span class="sep">·</span><span class="meta" id="agentCount">5 agents</span>
-      <span class="sep">·</span><span class="meta">4 languages</span>
-      <span class="sep">·</span><span class="meta">3 fan surfaces</span>
+      <span class="sep">·</span><span class="meta" id="langCount">4 languages</span>
+      <span class="sep">·</span><span class="meta" id="surfCount">3 fan surfaces</span>
     </p>
     <div class="ops" id="ops">
       <button id="btnPlay" type="button" title="Start or pause (Space)">Start</button>
@@ -26,6 +26,7 @@
       </div>
       <button id="btnGoal" type="button" title="Jump to just before the next goal (G)">Next goal</button>
       <button id="btnReset" type="button" title="Reset to kick-off (Shift+R)">Reset</button>
+      <span class="addfan"><select id="fanLang" aria-label="Fan language"></select><button id="btnFan" type="button">Add a fan</button></span>
     </div>
     <div class="health">
       <span class="conn" id="connApi" title="Match server"></span>
@@ -68,6 +69,7 @@
 
   <section class="col card agents">
     <div class="col-head"><h2 class="card-title">AI agent team</h2><span>Agent Relay · #match</span></div>
+    <ul class="roster" id="roster" aria-label="Agents"></ul>
     <ol class="chat" id="chat"></ol>
   </section>
 

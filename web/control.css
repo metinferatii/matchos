@@ -142,3 +142,33 @@ figcaption .host { margin-inline-start: auto; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; transition: none !important; }
 }
+
+/* Roster */
+.roster { list-style: none; margin: 0 0 12px; padding: 0 0 12px; border-bottom: 1px solid var(--line); font-size: 13px; flex: none; }
+.roster li { display: grid; grid-template-columns: 8px minmax(96px, auto) minmax(0, 1fr) auto; align-items: baseline; column-gap: 10px; padding: 3px 0; }
+.roster .st { width: 6px; height: 6px; border-radius: 50%; background: var(--line); align-self: center; transition: background .2s; }
+.roster li.working .st { background: var(--text); }
+.roster b { font-weight: 600; white-space: nowrap; }
+.roster .role { color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.roster .hb { color: var(--dim); font-size: 12px; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.roster li.hired .hb { color: var(--accent); }
+.roster li.new { animation: rowin .2s ease-out; }
+@keyframes rowin { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+
+/* Message kinds */
+.mhead .kind { color: var(--muted); }
+.k-rejection .kind, .k-counter .kind { color: var(--live); }
+.k-agreement .kind, .k-hire .kind { color: var(--accent); }
+.k-draft .kind, .k-proposal .kind { color: var(--dim); }
+.k-draft .mtext, .k-proposal .mtext { color: var(--muted); }
+
+/* Add a fan */
+.addfan { display: inline-flex; gap: 4px; margin-inline-start: 8px; }
+.addfan select { background: var(--card); color: var(--text); border: 1px solid var(--line); border-radius: 6px; font: inherit; font-size: 13px; padding: 3px 6px; }
+.phone.added { animation: rowin .2s ease-out; }
+.fans { grid-template-columns: minmax(0, 1fr); }
+.phones { overflow: hidden; }
+.phone figcaption { white-space: nowrap; }
+.langs { display: none; }
+.phone:hover .langs { display: inline-flex; opacity: 1; }
+.phone:hover figcaption > span:first-child { display: none; }

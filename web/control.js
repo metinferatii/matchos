@@ -20,24 +20,45 @@
     translator: { c: "#ad9fc9", label: "translator" },
     stats: { c: "#93bb9c", label: "stats" },
     merch: { c: "#cc9c9c", label: "merch" },
-    producer: { c: "#b4bf91", label: "producer" }
+    producer: { c: "#b4bf91", label: "producer" },
+    "club-ops": { c: "#9fb7b0", label: "club-ops" },
+    crowd: { c: "#c3a7bb", label: "crowd" }
   };
-  var senders = {};
-  function countAgent(name) {
-    if (!name || senders[name]) return;
-    senders[name] = true;
-    $("agentCount").textContent = Math.max(5, Object.keys(senders).length) + " agents";
+  // hired agents ("translator-ja") take their base role's hue
+  function agentOf(name) {
+    var base = name && AGENTS[name] || name && AGENTS[String(name).split("-")[0]];
+    return { c: base ? base.c : "#a6a3a0", label: name || "agent" };
   }
-  function agentOf(name) { return AGENTS[name] || { c: "#8f9f93", label: name || "agent" }; }
+  function countAgent() {}
+
+  // ---------- Roster ----------
+  var rosterSeen = null;
+  function hhmm(ts) { var d = new Date(ts); return String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0"); }
+  function renderRoster(list) {
+    if (!Array.isArray(list)) return;
+    var first = rosterSeen === null;
+    var seenNow = {};
+    $("roster").innerHTML = list.map(function (r) {
+      seenNow[r.name] = true;
+      var fresh = !first && !rosterSeen[r.name];
+      var hired = r.hiredBy ? "hired by " + esc(r.hiredBy) + (r.hiredAt ? " · " + hhmm(r.hiredAt) : "") : "";
+      return '<li class="' + (r.status === "working" ? "working" : "") + (fresh ? " new" : "") + (r.hiredBy ? " hired" : "") + '">' +
+        '<span class="st" title="' + esc(r.status || "idle") + '"></span>' +
+        '<b style="color:' + agentOf(r.name).c + '">' + esc(r.name) + "</b>" +
+        '<span class="role">' + esc(r.role || "") + "</span>" +
+        '<span class="hb">' + hired + "</span></li>";
+    }).join("");
+    rosterSeen = seenNow;
+  }
   var FLAG_LANG = { "\u{1F1E6}\u{1F1F1}": "sq", "\u{1F1EA}\u{1F1F8}": "es", "\u{1F1F8}\u{1F1E6}": "ar", "\u{1F1EC}\u{1F1E7}": "en" };
   var PICTO = /[\u{1F1E6}-\u{1F1FF}]|\p{Extended_Pictographic}|\uFE0F|\u200D/gu;
   function agentText(raw) {
     var t = String(raw);
     // translator posts "flag text · flag text ..."; show one line per language with a plain code
     // newer format: "sq: text · es: text · ar: text"
-    if (/^(sq|es|ar|en):\s/.test(t)) {
-      return t.split(/\s+·\s+(?=(?:sq|es|ar|en):\s)/).map(function (p) {
-        var m = p.match(/^(sq|es|ar|en):\s*/);
+    if (/^[a-z]{2}:\s/.test(t)) {
+      return t.split(/\s+·\s+(?=[a-z]{2}:\s)/).map(function (p) {
+        var m = p.match(/^([a-z]{2}):\s*/);
         return '<span class="tr"><span class="lc">' + m[1] + '</span><span dir="auto">' + mention(esc(p.slice(m[0].length).replace(PICTO, "").trim())) + "</span></span>";
       }).join("");
     }
@@ -57,11 +78,11 @@
   }
 
   var seenMsg = {};
-  var lastFrom = null, lastTo = null, lastTs = 0;
+  var lastFrom = null, lastTo = null, lastKind = "", lastTs = 0;
   var chat = $("chat");
   function msgKey(m) { return m.from + "|" + m.ts + "|" + m.text; }
   function renderEmpty() {
-    if (!chat.children.length) chat.innerHTML = '<li class="empty">Quiet before kick-off. Once the replay starts, ingest, commentator, translator, stats and merch hand work to each other here.</li>';
+    if (!chat.children.length) chat.innerHTML = '<li class="empty">Quiet before kick-off. Once the replay starts, the producer briefs the team and every hand-off shows up here.</li>';
   }
   function addAgentMsg(m, animate) {
     if (!m || !m.text) return;
@@ -72,16 +93,17 @@
     if (empty) empty.remove();
     var a = agentOf(m.from);
     var toName = m.to ? String(m.to).replace(/^@/, "") : "#match";
-    var cont = m.from === lastFrom && m.to === lastTo && m.ts - lastTs < 15000;
-    lastFrom = m.from; lastTo = m.to; lastTs = m.ts;
+    var cont = m.from === lastFrom && m.to === lastTo && (m.kind || "") === lastKind && m.ts - lastTs < 15000;
+    lastFrom = m.from; lastTo = m.to; lastKind = m.kind || ""; lastTs = m.ts;
     var li = document.createElement("li");
-    li.className = "msg" + (cont ? " cont" : "") + (animate ? " new" : "");
+    li.className = "msg" + (cont ? " cont" : "") + (animate ? " new" : "") + (m.kind ? " k-" + m.kind : "");
     li.style.setProperty("--c", a.c);
     var t = new Date(m.ts || Date.now());
     var time = String(t.getHours()).padStart(2, "0") + ":" + String(t.getMinutes()).padStart(2, "0") + ":" + String(t.getSeconds()).padStart(2, "0");
     countAgent(m.from);
-    var toAgent = AGENTS[toName] || AGENTS[toName.replace(/s$/, "")];
-    var to = '<span class="arrow">→</span><span class="to"' + (toAgent ? ' style="color:' + toAgent.c + '"' : "") + ">" + esc(toName) + "</span>";
+    var toAgent = AGENTS[toName] || AGENTS[toName.replace(/s$/, "")] || AGENTS[toName.split("-")[0]];
+    var to = '<span class="arrow">→</span><span class="to"' + (toAgent ? ' style="color:' + toAgent.c + '"' : "") + ">" + esc(toName) + "</span>" +
+      (m.kind ? '<span class="kind">· ' + esc(m.kind) + "</span>" : "");
     li.innerHTML = (cont ? "" : '<div class="mhead"><b>' + esc(a.label) + "</b>" + to + "<time>" + time + "</time></div>") +
       '<div class="mtext">' + agentText(m.text) + "</div>";
     var nearBottom = chat.scrollHeight - chat.scrollTop - chat.clientHeight < 220;
@@ -247,6 +269,8 @@
     $("tPens").hidden = !pens;
     if (pens) $("tPens").textContent = s.shootout.home + "–" + s.shootout.away;
     $("liveDot").classList.toggle("on", !!s.running);
+    if (Array.isArray(s.roster)) { $("agentCount").textContent = s.roster.length + " agents"; renderRoster(s.roster); }
+    if (Array.isArray(s.languages)) $("langCount").textContent = s.languages.length + " languages";
     var play = $("btnPlay");
     play.textContent = s.running ? "Pause" : (s.cursor >= s.total ? "Finished" : "Start");
     play.classList.toggle("running", !!s.running);
@@ -374,7 +398,8 @@
   });
 
   // ---------- Surfaces ----------
-  var LANG_NAME = { en: "English", sq: "Shqip", es: "Español", ar: "العربية" };
+  var LANG_NAME = { en: "English", sq: "Shqip", es: "Español", ar: "العربية", ja: "日本語", fr: "Français", de: "Deutsch", tr: "Türkçe" };
+  var ALL_LANGS = ["en", "sq", "es", "ar", "ja", "fr", "de", "tr"];
   function fitFrame(screen, iframe, baseW) {
     var w = screen.clientWidth, h = screen.clientHeight;
     if (!w || !h) return;
@@ -385,11 +410,14 @@
   }
   // phones take their size from the row height, capped by the column width
   var phones = document.querySelector(".phones");
-  new ResizeObserver(function () {
+  function sizePhones() {
+    var n = phones.querySelectorAll(".phone").length || 1;
     var h = phones.clientHeight - 30; // minus caption
-    var w = Math.min(h * 0.5, (phones.clientWidth - 24) / 2);
-    phones.style.setProperty("--phone-w", Math.round(Math.max(160, w)) + "px");
-  }).observe(phones);
+    var w = Math.min(h * 0.5, (phones.clientWidth - 24 * (n - 1)) / n);
+    phones.style.setProperty("--phone-w", Math.round(Math.max(120, w)) + "px");
+  }
+  new ResizeObserver(sizePhones).observe(phones);
+  function updateSurfaceCount() { $("surfCount").textContent = (1 + phones.querySelectorAll(".phone").length) + " fan surfaces"; }
 
   var club = $("clubFrame");
   // land the club site on its live match centre so the embed is in view
@@ -402,20 +430,48 @@
   });
   new ResizeObserver(function () { fitFrame($("clubScreen"), club, 1100); }).observe($("clubScreen"));
 
-  document.querySelectorAll(".surface.phone").forEach(function (fig) {
+  function setupPhone(fig) {
     var screen = fig.querySelector(".screen");
     var iframe = fig.querySelector("iframe");
     function setLang(lang) {
       fig.dataset.lang = lang;
       iframe.src = "widget.html?" + new URLSearchParams({ match: MATCH_ID, lang: lang, userId: iframe.dataset.user + "-" + lang, fill: "1" });
-      fig.querySelector(".lname").textContent = LANG_NAME[lang];
+      fig.querySelector(".lname").textContent = LANG_NAME[lang] || lang;
       fig.querySelectorAll(".langs button").forEach(function (b) { b.classList.toggle("on", b.dataset.lang === lang); });
     }
-    fig.querySelector(".langs").innerHTML = ["sq", "es", "ar", "en"].map(function (l) { return '<button type="button" data-lang="' + l + '">' + l + "</button>"; }).join("");
+    fig.querySelector(".langs").innerHTML = ALL_LANGS.map(function (l) { return '<button type="button" data-lang="' + l + '">' + l + "</button>"; }).join("");
     fig.querySelector(".langs").addEventListener("click", function (e) {
       var b = e.target.closest("button"); if (b && b.dataset.lang !== fig.dataset.lang) setLang(b.dataset.lang);
     });
+    fig._setLang = setLang;
     setLang(fig.dataset.lang);
     new ResizeObserver(function () { fitFrame(screen, iframe, 360); }).observe(screen);
+  }
+  document.querySelectorAll(".surface.phone").forEach(setupPhone);
+  updateSurfaceCount();
+
+  // Operator: add a fan in any language. A third phone joins the stage when it fits;
+  // otherwise the newest fan takes over the second phone.
+  $("fanLang").innerHTML = ALL_LANGS.map(function (l) { return '<option value="' + l + '"' + (l === "ja" ? " selected" : "") + ">" + l + "</option>"; }).join("");
+  $("btnFan").addEventListener("click", function () {
+    var lang = $("fanLang").value;
+    var list = phones.querySelectorAll(".phone");
+    var fits = (phones.clientWidth - 48) / 3 >= 170;
+    if (list.length < 3 && fits) {
+      var fig = document.createElement("figure");
+      fig.className = "surface phone added";
+      fig.dataset.lang = lang;
+      fig.innerHTML = '<div class="device"><div class="screen"><iframe title="Fan widget" data-user="stage-phone-' + (list.length + 1) + '"></iframe></div></div>' +
+        '<figcaption><span>Phone</span><span class="lang lname"></span><span class="langs"></span></figcaption>';
+      phones.appendChild(fig);
+      sizePhones();
+      setupPhone(fig);
+      updateSurfaceCount();
+    } else {
+      var last = list[list.length - 1];
+      last.querySelector("iframe").dataset.user = "stage-phone-new";
+      last._setLang(lang);
+      last.classList.remove("added"); void last.offsetWidth; last.classList.add("added");
+    }
   });
 })();
