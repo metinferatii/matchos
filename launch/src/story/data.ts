@@ -43,25 +43,37 @@ export type Shot = {
 const MATCH = "Live"
 
 /** Footage inside each shot plays this much faster than real time. */
-export const RATE = 1.6
+export const RATE = 1.15
 
-// The trailer cut: one idea per shot, 2.5-3 s each, captions of a few words.
-const shot = (beat: string, offsetS: number, seconds: number, layout: Layout, title: string): Shot =>
-    ({ beat, section: MATCH, offsetS, minS: seconds, maxS: seconds, layout, caption: { title } })
+// One idea per shot, long enough to see it happen, with a plain sentence saying what you're looking at.
+const shot = (beat: string, offsetS: number, seconds: number, layout: Layout, title: string, sub: string): Shot =>
+    ({ beat, section: MATCH, offsetS, minS: seconds, maxS: seconds, layout, caption: { title, sub } })
 
 export const SHOTS: Shot[] = [
-    shot("open", 0, 2.6, { kind: "row", who: ["arta", "diego", "sam"] }, "Three fans. Three languages."),
-    shot("picks", -0.5, 2.6, { kind: "pair", who: ["arta", "diego"] }, "Each picks a scorer."),
-    shot("goal-messi", -0.3, 2.8, { kind: "row", who: ["arta", "diego", "sam"] }, "Goal. Every screen at once."),
-    shot("goal-messi", 1.2, 2.8, { kind: "close", who: "arta" }, "“You called it.” Her agent."),
-    shot("agents-negotiate", -0.3, 3, { kind: "control", crop: "agents" }, "Her agent cuts her a deal."),
-    shot("arta-buys", -0.5, 2.4, { kind: "close", who: "arta" }, "Sold."),
-    shot("goal-dimaria", 0, 2.6, { kind: "close", who: "diego" }, "Diego called this one."),
-    shot("kenji-joins", 0, 3, { kind: "control", crop: "agents" }, "Japanese fan? Agent hired. Live."),
-    shot("kenji-joins", 5, 2.6, { kind: "close", who: "kenji" }, "Now in Japanese."),
-    shot("arta-returns", 0.5, 3, { kind: "close", who: "arta" }, "“While you were away…”"),
-    shot("kill", 0.5, 2.4, { kind: "row", who: ["arta", "diego", "kenji", "sam"] }, "We kill the server."),
-    shot("resume", 0, 2.8, { kind: "row", who: ["arta", "diego", "kenji", "sam"] }, "Nothing lost."),
+    shot("open", 0, 4.5, { kind: "row", who: ["arta", "diego", "sam"] }, "Three fans, three languages.",
+        "Arta in Tirana and Diego in Buenos Aires open the club app. Sam in London is on the club's website."),
+    shot("picks", -0.5, 4.5, { kind: "pair", who: ["arta", "diego"] }, "Each one gets their own agent.",
+        "It says hello in their language. Arta picks Messi to score next, Diego picks Di María."),
+    shot("goal-messi", -0.3, 4.5, { kind: "row", who: ["arta", "diego", "sam"] }, "Goal. Every screen at once.",
+        "Messi scores. Live commentary lands in Albanian, Spanish and English at the same moment."),
+    shot("goal-messi", 1.2, 4.8, { kind: "close", who: "arta" }, "“You called it.”",
+        "Arta picked Messi before the goal. Her own agent remembered, and congratulates her."),
+    shot("agents-negotiate", -0.3, 5, { kind: "control", crop: "agents" }, "Her agent gets her a deal.",
+        "Behind the scenes, Arta's agent asks the club's stock agent for a better price on Messi's shirt."),
+    shot("arta-buys", -0.5, 4, { kind: "close", who: "arta" }, "Arta buys the shirt.",
+        "A personal offer, made for her, paid in one tap."),
+    shot("goal-dimaria", 0, 4.5, { kind: "close", who: "diego" }, "Now Diego called it.",
+        "Di María scores. Diego's agent knew his pick and gets him his own offer."),
+    shot("kenji-joins", 0, 5, { kind: "control", crop: "agents" }, "A fan joins in Japanese.",
+        "No agent speaks Japanese yet, so the producer agent hires a Japanese translator on the spot."),
+    shot("kenji-joins", 5, 4.5, { kind: "close", who: "kenji" }, "Kenji gets the match in Japanese.",
+        "Seconds later, with an agent of his own."),
+    shot("arta-returns", 0.5, 5, { kind: "close", who: "arta" }, "“While you were away…”",
+        "Arta closed the app for a few minutes. When she comes back, her agent tells her what she missed."),
+    shot("kill", 0.5, 4, { kind: "row", who: ["arta", "diego", "kenji", "sam"] }, "We pull the plug on the server.",
+        "Every fan's screen shows it's reconnecting."),
+    shot("resume", 0, 4.8, { kind: "row", who: ["arta", "diego", "kenji", "sam"] }, "Nothing is lost.",
+        "Each match and each fan's agent is a durable actor. They pick up exactly where they left off."),
 ]
 
 /** Shots with their clip start and length resolved from the timeline; shots whose beat is missing are dropped. */

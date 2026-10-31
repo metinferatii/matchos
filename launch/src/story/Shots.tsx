@@ -70,7 +70,7 @@ export const Chip = ({ p, style }: { p: Persona; style?: CSSProperties }) => (
 const CaptionText = ({ caption, at = 2, size = 52 }: { caption: Caption; at?: number; size?: number }) => (
     <>
         <Rise at={at} style={{ fontFamily: F.title, fontWeight: 800, fontSize: size, lineHeight: 1.1, letterSpacing: "-0.01em" }}>{caption.title}</Rise>
-        {caption.sub && <Rise at={at + 14} style={{ marginTop: 22, fontSize: Math.max(30, size * 0.62), lineHeight: 1.4, color: C.muted }}>{caption.sub}</Rise>}
+        {caption.sub && <Rise at={at + 14} style={{ marginTop: 22, fontSize: 34, lineHeight: 1.4, color: C.muted, maxWidth: 1400 }}>{caption.sub}</Rise>}
     </>
 )
 
@@ -129,7 +129,7 @@ export function ShotView({ layout, caption, section, startFrame }: { layout: Lay
         const p = SURFACES[layout.who].persona!
         body = <SideBySide who={layout.who} startFrame={startFrame} text={<>
             <Rise at={0}><Chip p={p} /></Rise>
-            <div style={{ marginTop: 30 }}><CaptionText caption={caption} size={88} /></div>
+            <div style={{ marginTop: 30 }}><CaptionText caption={caption} size={64} /></div>
         </>} />
     } else if (layout.kind === "control") {
         const r = CROPS[layout.crop]
@@ -138,7 +138,7 @@ export function ShotView({ layout, caption, section, startFrame }: { layout: Lay
             <>
                 <Abs style={{ left: 120, top: 0, bottom: 0, width: 1920 - 120 - 260 - r.w * scale - 120, display: "flex", flexDirection: "column", justifyContent: "center" }}>
                     <Rise at={0}><Label color={C.accent} style={{ fontSize: 20 }}>Control room · Agent Relay</Label></Rise>
-                    <div style={{ marginTop: 30 }}><CaptionText caption={caption} size={84} /></div>
+                    <div style={{ marginTop: 30 }}><CaptionText caption={caption} size={68} /></div>
                 </Abs>
                 <Abs style={{ right: 260, top: 140 }}>
                     <Rise at={2} style={{ border: `2px solid ${C.line}`, borderRadius: 14, overflow: "hidden" }}><Clip id="control" startFrame={startFrame} scale={scale} crop={r} /></Rise>
@@ -170,13 +170,13 @@ export function ShotView({ layout, caption, section, startFrame }: { layout: Lay
         )
         body = pair ? (
             <>
-                <Abs style={{ left: 120, top: 0, bottom: 0, width: 760, display: "flex", flexDirection: "column", justifyContent: "center" }}><CaptionText caption={caption} size={88} /></Abs>
+                <Abs style={{ left: 120, top: 0, bottom: 0, width: 760, display: "flex", flexDirection: "column", justifyContent: "center" }}><CaptionText caption={caption} size={64} /></Abs>
                 <Abs style={{ right: 200, top }}>{devices}</Abs>
             </>
         ) : (
             <>
                 <Abs style={{ left: 0, right: 0, top, display: "flex", justifyContent: "center" }}>{devices}</Abs>
-                <Abs style={{ left: 120, right: 120, top: top + areaH + 40 }}><CaptionText caption={caption} size={72} /></Abs>
+                <Abs style={{ left: 120, right: 120, top: top + areaH + 40 }}><CaptionText caption={caption} size={64} /></Abs>
             </>
         )
     }
