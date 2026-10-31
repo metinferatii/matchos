@@ -22,6 +22,7 @@ export type FeedItem = {
     kind: "commentary" | "answer" | "system"
     text: string
     personal?: true // only for this fan (answers, order confirmations); kept in their `state` feed
+    agent?: string // set when the fan's own agent wrote it, e.g. "fan-sq-3f2a"
 }
 
 export type Offer = {
@@ -32,6 +33,7 @@ export type Offer = {
     originalPriceEur?: number // before the discount, for a struck-through price
     discountPct: number
     expiresAt: number // epoch ms
+    personal?: true // negotiated by this fan's own agent, sent only to them
 }
 
 export type Score = { home: number; away: number }
@@ -43,6 +45,20 @@ export type Predictions = Prediction[]
 // Newsroom message kinds, for styling the agent log. Optional: older messages have none.
 export type AgentKind = "directive" | "draft" | "rejection" | "proposal" | "counter" | "agreement" | "hire" | "initiative" | "note"
 export type AgentMsg = { from: string; to: string; text: string; ts: number; kind?: AgentKind }
+
+// Each connected fan gets their own agent, backed by a FanAgent actor (keyed by userId) that remembers them.
+export type FanAgentInfo = { userId: string; name: string; lang: FanLang; favourite?: string; status: "idle" | "working"; since: number }
+export type FanMemory = {
+    userId: string
+    lang: FanLang
+    favourite?: string // their latest "who scores next" pick
+    picks: { player: string; at: string }[] // every pick, with the match clock
+    questions: string[]
+    purchases: { title: string; priceEur: number }[]
+    lastSeenCursor: number // match events seen when they last left
+    lastSeenAt: number
+    notes: { clock: string; text: string }[] // what their agent told them
+}
 
 // Club ops rules for merch: jersey stock, max discount and allowed bundles per player (Supabase `inventory`).
 export type InventoryItem = { player: string; team: string; stock: number; maxDiscountPct: number; bundles: string[] }

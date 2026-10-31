@@ -13,13 +13,13 @@ export const JERSEY: Record<string, number> = { Messi: 10, "Di María": 11, Mbap
 
 // Same rows as supabase/schema.sql; used to reseed on reset and if Supabase is unreachable.
 export const SEED: InventoryItem[] = [
-    { player: "Messi", team: "Argentina", stock: 40, maxDiscountPct: 15, bundles: ["scarf"] },
-    { player: "Di María", team: "Argentina", stock: 25, maxDiscountPct: 25, bundles: ["scarf"] },
-    { player: "Mbappé", team: "France", stock: 2, maxDiscountPct: 20, bundles: ["scarf"] },
-    { player: "Kolo Muani", team: "France", stock: 6, maxDiscountPct: 20, bundles: [] },
-    { player: "Julián Álvarez", team: "Argentina", stock: 15, maxDiscountPct: 20, bundles: ["scarf"] },
-    { player: "Dybala", team: "Argentina", stock: 10, maxDiscountPct: 20, bundles: [] },
-    { player: "Griezmann", team: "France", stock: 15, maxDiscountPct: 20, bundles: ["scarf"] },
+    { player: "Messi", team: "Argentina", stock: 40, maxDiscountPct: 15, bundles: ["scarf", "name print"] },
+    { player: "Di María", team: "Argentina", stock: 25, maxDiscountPct: 25, bundles: ["scarf", "name print"] },
+    { player: "Mbappé", team: "France", stock: 2, maxDiscountPct: 20, bundles: ["scarf", "name print"] },
+    { player: "Kolo Muani", team: "France", stock: 6, maxDiscountPct: 20, bundles: ["name print"] },
+    { player: "Julián Álvarez", team: "Argentina", stock: 15, maxDiscountPct: 20, bundles: ["scarf", "name print"] },
+    { player: "Dybala", team: "Argentina", stock: 10, maxDiscountPct: 20, bundles: ["name print"] },
+    { player: "Griezmann", team: "France", stock: 15, maxDiscountPct: 20, bundles: ["scarf", "name print"] },
 ]
 
 type Row = { player: string; team: string; stock: number; max_discount_pct: number; bundles: string[] }
@@ -38,7 +38,7 @@ export async function reseedInventory() {
     await supabase.upsert("inventory", SEED.map(i => ({ ...toRow(i), updated_at: new Date().toISOString() })))
 }
 
-type Terms = { player: string; team: string; item: "jersey" | "scarf"; discountPct: number; bundle?: string }
+export type Terms = { player: string; team: string; item: "jersey" | "scarf"; discountPct: number; bundle?: string }
 
 const price = (t: Terms) => +((t.item === "scarf" ? SCARF_EUR : JERSEY_EUR) * (1 - t.discountPct / 100)).toFixed(2)
 const describeTerms = (t: Terms) =>
@@ -63,10 +63,11 @@ function toOffer(t: Terms): Offer {
 /** club-ops: checks each proposal against the club's rules. */
 export function startClubOps(clubOps: Member) {
     clubOps.on(async m => {
-        if (m.from !== "merch" || m.kind !== "proposal") return
+        // Merch, and fans' own agents negotiating personal offers.
+        if (!(m.from === "merch" || m.from.startsWith("fan-")) || m.kind !== "proposal") return
         const t = m.data as Terms
         const inv = (await room.getInventory())[t.player]
-        const reply = (kind: "agreement" | "counter" | "rejection", text: string, data?: unknown) => clubOps.post("merch", text, { kind, ref: m.ref, data })
+        const reply = (kind: "agreement" | "counter" | "rejection", text: string, data?: unknown) => clubOps.post(m.from, text, { kind, ref: m.ref, data })
         if (!inv) return reply("agreement", `No rules on file for ${t.player}. Approved: ${describeTerms(t)}.`, t)
         if (t.item === "jersey" && inv.stock <= LOW_STOCK) {
             if (!inv.bundles.includes("scarf")) return reply("rejection", `Stock too low on ${t.player} jerseys (${inv.stock} left). No offer.`)
@@ -85,12 +86,15 @@ export function startClubOps(clubOps: Member) {
     })
 }
 
-/** merch: proposes on a goal, handles one counter round, and falls back to a safe default. */
-export async function negotiateOffer(merch: Member, e: MatchEvent): Promise<Offer | null> {
+/**
+ * Proposes an offer for a goal to club-ops, handles one counter round, and falls back to a safe default.
+ * Used by merch (the general offer) and by fans' own agents (a personal one, starting from `start`).
+ */
+export async function negotiateOffer(merch: Member, e: MatchEvent, start?: Partial<Terms>): Promise<Offer | null> {
     const deadline = Date.now() + STEP_MS
-    let terms: Terms = { player: e.player!, team: e.team!, item: "jersey", discountPct: 20 }
+    let terms: Terms = { player: e.player!, team: e.team!, item: "jersey", discountPct: 20, ...start }
     for (let round = 1; round <= 2; round++) {
-        const ref = `${e.id}-${round}`
+        const ref = `${e.id}-${merch.name}-${round}`
         const reply = merch.waitFor(x => x.from === "club-ops" && x.ref === ref, Math.max(100, deadline - Date.now()))
         await merch.post("club-ops", `${round === 1 ? "Proposal" : "Counter-proposal"}: ${describeTerms(terms)} for 10 min.`, { kind: "proposal", ref, data: terms })
         const r = await reply
@@ -106,7 +110,7 @@ export async function negotiateOffer(merch: Member, e: MatchEvent): Promise<Offe
         }
         // A counter: a smaller discount is sweetened with a bundle if the club allows one; anything else is accepted.
         const counter = r.data as Terms
-        if (round === 1 && counter.item === "jersey" && counter.discountPct < terms.discountPct && !counter.bundle) {
+        if (round === 1 && counter.item === "jersey" && counter.discountPct < terms.discountPct && !counter.bundle && !start) {
             terms = { ...counter, bundle: "scarf" }
             continue
         }

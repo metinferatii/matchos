@@ -14,6 +14,7 @@ import { templateLine } from "../shared/templates"
 import { EVENTS, FAST_MODEL, MATCH_ID, MODEL, Member, RUN, STEP_MS, budget, describe, flags, goalsBy, isGoal, llm, room, supabase, tick } from "./core"
 import { actors } from "./generated/index.js"
 import { LANG_NAME, releaseHires, restoreHires, startHiring } from "./hiring"
+import { onFanJoined, onFanLeft, onPurchase, onQuestion, onVote, restoreFans } from "./fan-agents"
 import { startInitiative } from "./initiative"
 import { JERSEY, loadInventory, negotiateOffer, recordSale, reseedInventory, startClubOps } from "./negotiation"
 import { ruleDirective, startProducer, type Directive } from "./producer"
@@ -135,7 +136,7 @@ merch.on(async m => {
     const offer = flags.negotiation ? await merch.task(() => negotiateOffer(merch, e)) : defaultOffer(e)
     if (!offer) return
     await room.setOffer(offer)
-    await merch.post("all", `Flash offer live: ${offer.title}, €${offer.priceEur.toFixed(2)} (${offer.discountPct}% off) for 10 min.`)
+    await merch.post("all", `Flash offer live: ${offer.title}, €${offer.priceEur.toFixed(2)} (${offer.discountPct}% off) for 10 min.`, { data: { offer, eventId: e.id } })
 })
 
 merch.on(async m => {
@@ -146,6 +147,7 @@ merch.on(async m => {
     await room.confirmOrder(order.id, price)
     await merch.post("all", `Sold ${order.offer.title} for €${price.toFixed(2)}${saved ? " · saved to Supabase" : ""}`)
     if (flags.negotiation) await recordSale(members["club-ops"], order.offer)
+    if (flags.fanAgents) await onPurchase(order.userId, order.offer).catch(() => {})
 })
 
 // ---- stats: prep notes on big moments, and answers to fan questions ----
@@ -200,8 +202,15 @@ async function onActorMessage(msg: any) {
         await ingest.post("all", describe(e), { ref: e.id, data: { eventId: e.id } })
         // Give the final commentary a moment to land so the archive includes it.
         if (e.type === "full_time") setTimeout(() => archive().catch(err => console.warn("[archive]", err.message)), 4000)
+    } else if (msg.type === "fan_joined" && flags.fanAgents) {
+        onFanJoined(msg.userId, msg.lang, msg.cursor).catch(err => console.warn("[fan]", err.message))
+    } else if (msg.type === "fan_left" && flags.fanAgents) {
+        await onFanLeft(msg.userId, msg.cursor)
+    } else if (msg.type === "vote" && flags.fanAgents) {
+        await onVote(msg.userId, msg.player, msg.clock)
     } else if (msg.type === "question") {
         const q = msg.question
+        if (flags.fanAgents) onQuestion(q.userId, q.text).catch(() => {})
         await ingest.post("stats", `Fan question (${q.lang}): "${q.text}"`, { ref: q.id.slice(0, 8), data: { question: q } })
     } else if (msg.type === "language_needed" && hiring) {
         const { lang, fans } = msg
@@ -219,7 +228,11 @@ async function connectActor() {
     try {
         const { websocketUrl } = await actors.MatchRoom.prepareWebsocket({ actorId: MATCH_ID, metadata: { userId: "__agents__", lang: "en" } })
         const ws = new WebSocket(websocketUrl)
-        ws.addEventListener("open", () => console.log("[actor] connected"))
+        ws.addEventListener("open", () => {
+            console.log("[actor] connected")
+            // Fans connected before this process (or before an actor restart) get their agents back.
+            if (flags.fanAgents) restoreFans().catch(err => console.warn("[fan] restore", err.message))
+        })
         ws.addEventListener("message", e => {
             let msg: any
             try { msg = JSON.parse(String(e.data)) } catch { return }

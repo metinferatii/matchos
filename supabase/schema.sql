@@ -31,12 +31,12 @@ create table if not exists public.inventory (
 alter table public.inventory enable row level security;
 
 insert into public.inventory (player, team, stock, max_discount_pct, bundles) values
-    ('Messi', 'Argentina', 40, 15, '{scarf}'),
-    ('Di María', 'Argentina', 25, 25, '{scarf}'),
-    ('Mbappé', 'France', 2, 20, '{scarf}'),
-    ('Kolo Muani', 'France', 6, 20, '{}'),
-    ('Julián Álvarez', 'Argentina', 15, 20, '{scarf}'),
-    ('Dybala', 'Argentina', 10, 20, '{}'),
-    ('Griezmann', 'France', 15, 20, '{scarf}')
+    ('Messi', 'Argentina', 40, 15, '{scarf,name print}'),
+    ('Di María', 'Argentina', 25, 25, '{scarf,name print}'),
+    ('Mbappé', 'France', 2, 20, '{scarf,name print}'),
+    ('Kolo Muani', 'France', 6, 20, '{name print}'),
+    ('Julián Álvarez', 'Argentina', 15, 20, '{scarf,name print}'),
+    ('Dybala', 'Argentina', 10, 20, '{name print}'),
+    ('Griezmann', 'France', 15, 20, '{scarf,name print}')
 on conflict (player) do update set team = excluded.team, stock = excluded.stock,
     max_discount_pct = excluded.max_discount_pct, bundles = excluded.bundles, updated_at = now();

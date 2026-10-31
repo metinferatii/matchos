@@ -25,7 +25,11 @@
     crowd: { c: "#c3a7bb", label: "crowd" }
   };
   // hired agents ("translator-ja") take their base role's hue
+  // every fan's own agent ("fan-sq-3f2a") shares one muted hue, so fifty fans stay one voice
+  var FAN_C = "#b8b2a6";
+  function isFan(name) { return /^fan-/.test(String(name || "")); }
   function agentOf(name) {
+    if (isFan(name)) return { c: FAN_C, label: String(name) };
     var base = name && AGENTS[name] || name && AGENTS[String(name).split("-")[0]];
     return { c: base ? base.c : "#a6a3a0", label: name || "agent" };
   }
@@ -50,6 +54,35 @@
     }).join("");
     rosterSeen = seenNow;
   }
+  // ---------- Fan agents ----------
+  var FA_MAX = 6;
+  var faSeen = null;
+  function renderFanAgents(list) {
+    var box = $("fanAgents");
+    if (!Array.isArray(list)) { box.hidden = true; $("fanCount").hidden = $("fanSep").hidden = true; return; }
+    $("fanCount").hidden = $("fanSep").hidden = false;
+    $("fanCount").textContent = list.length === 1 ? "1 fan agent" : list.length + " fan agents";
+    box.hidden = !list.length;
+    // newest first, so a fan who just joined shows up at the top
+    var rows = list.slice().sort(function (a, b) { return (b.since || 0) - (a.since || 0); });
+    var first = faSeen === null;
+    var seenNow = {};
+    var html = rows.slice(0, FA_MAX).map(function (f) {
+      var key = f.userId || f.name;
+      seenNow[key] = true;
+      var fresh = !first && !faSeen[key];
+      return '<li class="' + (f.status === "working" ? "working" : "") + (fresh ? " new" : "") + '">' +
+        '<span class="st" title="' + esc(f.status || "idle") + '"></span>' +
+        "<b>" + esc(f.name || key) + "</b>" +
+        '<span class="lc">' + esc(f.lang || "") + "</span>" +
+        '<span class="pk">' + (f.favourite ? "picked <em>" + esc(f.favourite) + "</em>" : "") + "</span></li>";
+    });
+    rows.slice(FA_MAX).forEach(function (f) { seenNow[f.userId || f.name] = true; });
+    if (rows.length > FA_MAX) html.push('<li class="more">+' + (rows.length - FA_MAX) + " more</li>");
+    $("faList").innerHTML = html.join("");
+    faSeen = seenNow;
+  }
+
   var FLAG_LANG = { "\u{1F1E6}\u{1F1F1}": "sq", "\u{1F1EA}\u{1F1F8}": "es", "\u{1F1F8}\u{1F1E6}": "ar", "\u{1F1EC}\u{1F1E7}": "en" };
   var PICTO = /[\u{1F1E6}-\u{1F1FF}]|\p{Extended_Pictographic}|\uFE0F|\u200D/gu;
   function agentText(raw) {
@@ -74,7 +107,7 @@
     return mention(esc(t.replace(PICTO, "").replace(/\s{2,}/g, " ").trim()));
   }
   function mention(h) {
-    return h.replace(/(^|\s)@([a-z]+)/g, function (_, sp, n) { return sp + '<span class="mention" style="--c-to:' + agentOf(n).c + '">' + n + "</span>"; });
+    return h.replace(/(^|\s)@([a-z][a-z0-9]*(?:-[a-z0-9]+)*)/g, function (_, sp, n) { return sp + '<span class="mention" style="--c-to:' + agentOf(n).c + '">' + n + "</span>"; });
   }
 
   var seenMsg = {};
@@ -101,7 +134,7 @@
     var t = new Date(m.ts || Date.now());
     var time = String(t.getHours()).padStart(2, "0") + ":" + String(t.getMinutes()).padStart(2, "0") + ":" + String(t.getSeconds()).padStart(2, "0");
     countAgent(m.from);
-    var toAgent = AGENTS[toName] || AGENTS[toName.replace(/s$/, "")] || AGENTS[toName.split("-")[0]];
+    var toAgent = isFan(toName) ? { c: FAN_C } : AGENTS[toName] || AGENTS[toName.replace(/s$/, "")] || AGENTS[toName.split("-")[0]];
     var to = '<span class="arrow">→</span><span class="to"' + (toAgent ? ' style="color:' + toAgent.c + '"' : "") + ">" + esc(toName) + "</span>" +
       (m.kind ? '<span class="kind">· ' + esc(m.kind) + "</span>" : "");
     li.innerHTML = (cont ? "" : '<div class="mhead"><b>' + esc(a.label) + "</b>" + to + "<time>" + time + "</time></div>") +
@@ -270,6 +303,7 @@
     if (pens) $("tPens").textContent = s.shootout.home + "–" + s.shootout.away;
     $("liveDot").classList.toggle("on", !!s.running);
     if (Array.isArray(s.roster)) { $("agentCount").textContent = s.roster.length + " agents"; renderRoster(s.roster); }
+    renderFanAgents(s.fanAgents);
     if (Array.isArray(s.languages)) $("langCount").textContent = s.languages.length + " languages";
     var play = $("btnPlay");
     play.textContent = s.running ? "Pause" : (s.cursor >= s.total ? "Finished" : "Start");
@@ -435,10 +469,22 @@
     var iframe = fig.querySelector("iframe");
     function setLang(lang) {
       fig.dataset.lang = lang;
+      fig.classList.remove("left");
+      fig.querySelector(".away-btn").textContent = "Leave";
       iframe.src = "widget.html?" + new URLSearchParams({ match: MATCH_ID, lang: lang, userId: iframe.dataset.user + "-" + lang, fill: "1" });
       fig.querySelector(".lname").textContent = LANG_NAME[lang] || lang;
       fig.querySelectorAll(".langs button").forEach(function (b) { b.classList.toggle("on", b.dataset.lang === lang); });
     }
+    // Leave / Return: drop the connection (same userId kept), then come back to the agent's catch-up
+    var cap = fig.querySelector("figcaption");
+    if (!cap.querySelector(".away-btn")) cap.insertAdjacentHTML("beforeend", '<button type="button" class="away-btn" title="Disconnect this fan, then reconnect with the same id">Leave</button>');
+    if (!screen.querySelector(".away-note")) screen.insertAdjacentHTML("beforeend", '<div class="away-note"><b>Fan away</b><span>Their agent keeps watching the match for them.</span></div>');
+    cap.querySelector(".away-btn").addEventListener("click", function () {
+      if (fig.classList.contains("left")) { setLang(fig.dataset.lang); return; }
+      fig.classList.add("left");
+      iframe.src = "about:blank";
+      this.textContent = "Return";
+    });
     fig.querySelector(".langs").innerHTML = ALL_LANGS.map(function (l) { return '<button type="button" data-lang="' + l + '">' + l + "</button>"; }).join("");
     fig.querySelector(".langs").addEventListener("click", function (e) {
       var b = e.target.closest("button"); if (b && b.dataset.lang !== fig.dataset.lang) setLang(b.dataset.lang);

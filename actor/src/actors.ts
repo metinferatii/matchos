@@ -1,7 +1,7 @@
 import { Actor, Persisted, type ActorSocket } from "terse-sdk/actor"
 import match from "./match.json" with { type: "json" }
 import { templateLine } from "./templates.js"
-import type { AgentKind, AgentMsg, ClientMsg, ExtraLang, FanLang, FeedItem, InventoryItem, Lang, MatchEvent, Offer, Predictions, RosterEntry, Score, ServerMsg, SocketMeta } from "./contract.js"
+import type { AgentKind, AgentMsg, ClientMsg, ExtraLang, FanAgentInfo, FanLang, FanMemory, FeedItem, InventoryItem, Lang, MatchEvent, Offer, Predictions, RosterEntry, Score, ServerMsg, SocketMeta } from "./contract.js"
 
 const EVENTS = match.events as MatchEvent[]
 const LANGS: Lang[] = ["en", "sq", "es", "ar"]
@@ -26,6 +26,9 @@ export type AgentOut =
     | { type: "order"; order: Order }
     | { type: "control"; running: boolean; cursor: number }
     | { type: "language_needed"; lang: FanLang; fans: number }
+    | { type: "fan_joined"; userId: string; lang: FanLang; cursor: number }
+    | { type: "fan_left"; userId: string; cursor: number }
+    | { type: "vote"; userId: string; lang: FanLang; player: string; clock: string }
     | { type: "reset" }
 
 // Terse reserves the "state" message type, so the actor sends "room_state" and the gateway
@@ -53,6 +56,7 @@ export type RoomState = {
     roster: RosterEntry[]
     languages: FanLang[]
     inventory: Record<string, InventoryItem>
+    fanAgents: FanAgentInfo[]
 }
 
 /** One live match. The replay clock is the actor alarm; every field survives a restart. */
@@ -80,6 +84,9 @@ export class MatchRoom extends Actor<SocketMeta, ClientMsg, Outgoing> {
     @Persisted inventory: Record<string, InventoryItem> = {}
     // Recent fan questions and each vote's language, for the crowd agent's mood notes.
     @Persisted questions: Question[] = []
+    // Personal fan agents: who is active, and offers their agents negotiated for one fan only.
+    @Persisted fanAgents: FanAgentInfo[] = []
+    @Persisted personalOffers: Record<string, Offer> = {}
     @Persisted voteLang: Record<string, FanLang> = {}
 
     // ---- Replay control ----
@@ -116,6 +123,7 @@ export class MatchRoom extends Actor<SocketMeta, ClientMsg, Outgoing> {
         this.feed = { en: [], sq: [], es: [], ar: [] }
         this.agentLog = []
         this.offer = null
+        this.personalOffers = {}
         this.votes = {}
         this.commentedThrough = -1
         this.orders = []
@@ -140,6 +148,7 @@ export class MatchRoom extends Actor<SocketMeta, ClientMsg, Outgoing> {
         this.matchMinute = prev ? prev.displayMinute : 0
         this.clock = prev ? prev.clock : "0'"
         this.offer = null
+        this.personalOffers = {}
         this.broadcast({ type: "offer", offer: null })
         this.broadcast({ type: "score", ...this.score, minute: this.matchMinute, clock: this.clock })
         return this.getState()
@@ -253,6 +262,39 @@ export class MatchRoom extends Actor<SocketMeta, ClientMsg, Outgoing> {
         for (const lang of coveredLangs(this.roster)) if (lines[lang]) await this.pushFeed(lang, "commentary", lines[lang])
     }
 
+    // ---- Personal fan agents ----
+
+    /** A note from a fan's own agent, to that fan only (kept in their state feed). */
+    async postPersonal(userId: string, lang: FanLang, text: string, agent: string): Promise<void> {
+        await this.sendPersonal(userId, isFanLang(lang) ? lang : "en", "system", text, agent)
+    }
+
+    /** An offer a fan's agent negotiated for them; replaces the general offer for that fan only. */
+    async sendPersonalOffer(userId: string, offer: Offer): Promise<void> {
+        const personal: Offer = { ...offer, personal: true }
+        this.personalOffers = { ...this.personalOffers, [userId]: personal }
+        for (const s of await this.getConnections()) if (s.metadata.userId === userId) s.send({ type: "offer", offer: personal })
+    }
+
+    async upsertFanAgent(info: FanAgentInfo): Promise<void> {
+        this.fanAgents = [...this.fanAgents.filter(f => f.userId !== info.userId), info]
+    }
+
+    async removeFanAgent(userId: string): Promise<void> {
+        if (this.fanAgents.some(f => f.userId === userId)) this.fanAgents = this.fanAgents.filter(f => f.userId !== userId)
+    }
+
+    /** Fans connected right now (one entry per fan), so a restarted agents process can re-attach their agents. */
+    async getFans(): Promise<{ userId: string; lang: FanLang }[]> {
+        const seen = new Map<string, FanLang>()
+        for (const s of await this.getConnections("fan")) if (isFan(s.metadata.userId)) seen.set(s.metadata.userId, s.metadata.lang)
+        return [...seen].map(([userId, lang]) => ({ userId, lang }))
+    }
+
+    async getTimelineFrom(from: number): Promise<MatchEvent[]> {
+        return EVENTS.slice(Math.max(0, from), this.cursor)
+    }
+
     // ---- Newsroom roster (live hiring) ----
 
     /** The agents process registers its base team on start; hired agents already on the roster stay. */
@@ -325,6 +367,7 @@ export class MatchRoom extends Actor<SocketMeta, ClientMsg, Outgoing> {
             roster: this.roster,
             languages: coveredLangs(this.roster),
             inventory: this.inventory,
+            fanAgents: [...this.fanAgents].sort((a, b) => b.since - a.since),
         }
     }
 
@@ -344,6 +387,7 @@ export class MatchRoom extends Actor<SocketMeta, ClientMsg, Outgoing> {
         const lang = isFanLang(socket.metadata.lang) ? socket.metadata.lang : "en"
         socket.setTags(userId === AGENTS_USER ? "agents" : "fan", `lang:${lang}`)
         socket.send(await this.stateMsg(lang, userId))
+        if (isFan(userId)) await this.toAgents({ type: "fan_joined", userId, lang, cursor: this.cursor })
         // A fan in a language nobody covers yet: tell the newsroom, which may hire a translator.
         if (userId !== AGENTS_USER && !coveredLangs(this.roster).includes(lang)) {
             const fans = (await this.getConnections(`lang:${lang}`)).length
@@ -351,22 +395,32 @@ export class MatchRoom extends Actor<SocketMeta, ClientMsg, Outgoing> {
         }
     }
 
+    async onDisconnect(socket: Socket): Promise<void> {
+        const { userId } = socket.metadata
+        if (!isFan(userId)) return
+        const still = (await this.getConnections()).some(s => s.id !== socket.id && s.metadata.userId === userId)
+        if (!still) await this.toAgents({ type: "fan_left", userId, cursor: this.cursor })
+    }
+
     async onMessage(socket: Socket, message: ClientMsg): Promise<void> {
         const { userId, lang } = socket.metadata
         if (message.type === "vote" && typeof message.player === "string") {
             this.votes = { ...this.votes, [userId]: message.player.slice(0, 60) }
             this.voteLang = { ...this.voteLang, [userId]: isFanLang(lang) ? lang : "en" }
+            await this.toAgents({ type: "vote", userId, lang: isFanLang(lang) ? lang : "en", player: message.player.slice(0, 60), clock: this.clock })
             await this.sendStateToAll()
         } else if (message.type === "ask" && typeof message.text === "string" && message.text.trim()) {
             const question: Question = { id: crypto.randomUUID(), userId, lang, text: message.text.slice(0, 300), ts: Date.now() }
             this.questions = [...this.questions, question].slice(-30)
             await this.toAgents({ type: "question", question })
         } else if (message.type === "buy") {
-            if (!this.offer || this.offer.id !== message.offerId || this.offer.expiresAt < Date.now()) {
+            const mine = this.personalOffers[userId]
+            const offer = mine?.id === message.offerId ? mine : this.offer
+            if (!offer || offer.id !== message.offerId || offer.expiresAt < Date.now()) {
                 await this.sendPersonal(userId, lang, "system", "This offer has expired.")
                 return
             }
-            const order: Order = { id: crypto.randomUUID(), userId, lang: isFanLang(lang) ? lang : "en", offer: this.offer, ts: Date.now() }
+            const order: Order = { id: crypto.randomUUID(), userId, lang: isFanLang(lang) ? lang : "en", offer, ts: Date.now() }
             this.orders = [...this.orders, order]
             await this.toAgents({ type: "order", order })
         }
@@ -378,7 +432,7 @@ export class MatchRoom extends Actor<SocketMeta, ClientMsg, Outgoing> {
         const mine = (this.personal[userId] ?? []).filter(i => i.lang === lang)
         return {
             type: "room_state", score: this.score, minute: this.matchMinute, clock: this.clock,
-            feed: [...feedFor(this.feed, this.extraFeed, this.roster, lang), ...mine], offer: this.offer, predictions: tally(this.votes),
+            feed: [...feedFor(this.feed, this.extraFeed, this.roster, lang), ...mine], offer: this.personalOffers[userId] ?? this.offer, predictions: tally(this.votes),
         }
     }
 
@@ -389,8 +443,8 @@ export class MatchRoom extends Actor<SocketMeta, ClientMsg, Outgoing> {
     }
 
     /** Sends an item to one fan's sockets and keeps it for their future `state` messages. */
-    private async sendPersonal(userId: string, lang: FanLang, kind: FeedItem["kind"], text: string): Promise<void> {
-        const item: FeedItem = { id: crypto.randomUUID(), minute: this.matchMinute, clock: this.clock, lang, kind, text, personal: true }
+    private async sendPersonal(userId: string, lang: FanLang, kind: FeedItem["kind"], text: string, agent?: string): Promise<void> {
+        const item: FeedItem = { id: crypto.randomUUID(), minute: this.matchMinute, clock: this.clock, lang, kind, text, personal: true, ...(agent ? { agent } : {}) }
         this.personal = { ...this.personal, [userId]: [...(this.personal[userId] ?? []), item].slice(-20) }
         for (const s of await this.getConnections()) if (s.metadata.userId === userId) s.send({ type: "feed", item })
     }
@@ -412,6 +466,8 @@ export class MatchRoom extends Actor<SocketMeta, ClientMsg, Outgoing> {
     }
 
     private async setOfferNow(offer: Offer | null): Promise<void> {
+        // A new general offer (or none) supersedes any personal ones from the last goal.
+        this.personalOffers = {}
         this.offer = offer
         this.broadcast({ type: "offer", offer })
     }
@@ -445,6 +501,52 @@ function tally(votes: Record<string, string>): Predictions {
     const counts = new Map<string, number>()
     for (const p of Object.values(votes)) counts.set(p, (counts.get(p) ?? 0) + 1)
     return [...counts].map(([player, n]) => ({ player, votes: n })).sort((a, b) => b.votes - a.votes)
+}
+
+/** Everyone except the agents process and the control room's own socket is a fan. */
+function isFan(userId: string): boolean {
+    return userId !== AGENTS_USER && userId !== "control-room"
+}
+
+/**
+ * One fan's own agent memory, keyed by their userId: their language, picks, questions, purchases and
+ * where they left off. Durable, so a fan's agent remembers them across sessions and server restarts.
+ */
+export class FanAgent extends Actor {
+    @Persisted memory: FanMemory | null = null
+
+    async load(userId: string, lang: FanLang): Promise<{ memory: FanMemory; isNew: boolean }> {
+        const isNew = this.memory === null
+        this.memory = this.memory
+            ? { ...this.memory, lang }
+            : { userId, lang, picks: [], questions: [], purchases: [], lastSeenCursor: 0, lastSeenAt: Date.now(), notes: [] }
+        return { memory: this.memory, isNew }
+    }
+
+    async get(): Promise<FanMemory | null> {
+        return this.memory
+    }
+
+    async recordPick(player: string, at: string): Promise<void> {
+        if (!this.memory) return
+        this.memory = { ...this.memory, favourite: player, picks: [...this.memory.picks, { player, at }].slice(-20) }
+    }
+
+    async recordQuestion(text: string): Promise<void> {
+        if (this.memory) this.memory = { ...this.memory, questions: [...this.memory.questions, text].slice(-20) }
+    }
+
+    async recordPurchase(title: string, priceEur: number): Promise<void> {
+        if (this.memory) this.memory = { ...this.memory, purchases: [...this.memory.purchases, { title, priceEur }].slice(-20) }
+    }
+
+    async recordNote(clock: string, text: string): Promise<void> {
+        if (this.memory) this.memory = { ...this.memory, notes: [...this.memory.notes, { clock, text }].slice(-30) }
+    }
+
+    async markSeen(cursor: number): Promise<void> {
+        if (this.memory) this.memory = { ...this.memory, lastSeenCursor: cursor, lastSeenAt: Date.now() }
+    }
 }
 
 /** The base languages plus any covered by a hired translator. */

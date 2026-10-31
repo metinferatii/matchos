@@ -34,7 +34,8 @@
       ordered: "Order received. Confirmation is on its way.", expired: "This offer has ended.",
       off: "Subbed off", pens: "Penalties", pensMin: "Pens", pre: "Pre-match",
       reconnecting: "Reconnecting…", connecting: "Connecting…", powered: "Powered by",
-      waiting: "Commentary starts at kick-off.", jersey: "jersey"
+      waiting: "Commentary starts at kick-off.", jersey: "jersey",
+      yourAgent: "Your agent", agentGot: "Your agent got you this"
     },
     sq: {
       teams: { Argentina: "Argjentina", France: "Franca" },
@@ -46,7 +47,8 @@
       ordered: "Porosia u mor. Konfirmimi po vjen.", expired: "Kjo ofertë ka përfunduar.",
       off: "Zëvendësuar", pens: "Penalltitë", pensMin: "Pen.", pre: "Para ndeshjes",
       reconnecting: "Po rilidhet…", connecting: "Po lidhet…", powered: "Mundësuar nga",
-      waiting: "Komentet nisin me fishkëllimën e parë.", jersey: "fanellë"
+      waiting: "Komentet nisin me fishkëllimën e parë.", jersey: "fanellë",
+      yourAgent: "Agjenti yt", agentGot: "Agjenti yt ta siguroi këtë"
     },
     es: {
       teams: { Argentina: "Argentina", France: "Francia" },
@@ -58,7 +60,8 @@
       ordered: "Pedido recibido. La confirmación va en camino.", expired: "Esta oferta ha terminado.",
       off: "Sustituido", pens: "Penales", pensMin: "Pen.", pre: "Previa",
       reconnecting: "Reconectando…", connecting: "Conectando…", powered: "Con tecnología de",
-      waiting: "La narración empieza con el pitido inicial.", jersey: "camiseta"
+      waiting: "La narración empieza con el pitido inicial.", jersey: "camiseta",
+      yourAgent: "Tu agente", agentGot: "Tu agente te consiguió esto"
     },
     ar: {
       teams: { Argentina: "الأرجنتين", France: "فرنسا" },
@@ -70,7 +73,8 @@
       ordered: "تم استلام طلبك. التأكيد في الطريق.", expired: "انتهى هذا العرض.",
       off: "خرج", pens: "ركلات الترجيح", pensMin: "ترجيح", pre: "قبل المباراة",
       reconnecting: "جارٍ إعادة الاتصال…", connecting: "جارٍ الاتصال…", powered: "بدعم من",
-      waiting: "يبدأ التعليق مع صافرة البداية.", jersey: "قميص"
+      waiting: "يبدأ التعليق مع صافرة البداية.", jersey: "قميص",
+      yourAgent: "وكيلك", agentGot: "وكيلك حصل لك على هذا"
     },
     ja: {
       teams: { Argentina: "アルゼンチン", France: "フランス" },
@@ -82,7 +86,8 @@
       ordered: "注文を受け付けました。確認をお送りします。", expired: "このオファーは終了しました。",
       off: "交代", pens: "PK戦", pensMin: "PK", pre: "試合前",
       reconnecting: "再接続中…", connecting: "接続中…", powered: "Powered by",
-      waiting: "キックオフと同時に実況が始まります。", jersey: "ユニフォーム"
+      waiting: "キックオフと同時に実況が始まります。", jersey: "ユニフォーム",
+      yourAgent: "あなたのエージェント", agentGot: "あなたのエージェントが用意しました"
     },
     fr: {
       teams: { Argentina: "Argentine", France: "France" },
@@ -94,7 +99,8 @@
       ordered: "Commande reçue. La confirmation arrive.", expired: "Cette offre est terminée.",
       off: "Remplacé", pens: "Tirs au but", pensMin: "TAB", pre: "Avant-match",
       reconnecting: "Reconnexion…", connecting: "Connexion…", powered: "Propulsé par",
-      waiting: "Le commentaire commence au coup d'envoi.", jersey: "maillot"
+      waiting: "Le commentaire commence au coup d'envoi.", jersey: "maillot",
+      yourAgent: "Votre agent", agentGot: "Votre agent vous a obtenu ceci"
     },
     de: {
       teams: { Argentina: "Argentinien", France: "Frankreich" },
@@ -106,7 +112,8 @@
       ordered: "Bestellung erhalten. Die Bestätigung folgt.", expired: "Dieses Angebot ist abgelaufen.",
       off: "Ausgewechselt", pens: "Elfmeterschießen", pensMin: "11m", pre: "Vor dem Spiel",
       reconnecting: "Verbinde neu…", connecting: "Verbinde…", powered: "Bereitgestellt von",
-      waiting: "Der Kommentar beginnt mit dem Anpfiff.", jersey: "Trikot"
+      waiting: "Der Kommentar beginnt mit dem Anpfiff.", jersey: "Trikot",
+      yourAgent: "Dein Agent", agentGot: "Dein Agent hat das für dich geholt"
     },
     tr: {
       teams: { Argentina: "Arjantin", France: "Fransa" },
@@ -118,7 +125,8 @@
       ordered: "Sipariş alındı. Onay yolda.", expired: "Bu teklif sona erdi.",
       off: "Oyundan çıktı", pens: "Penaltılar", pensMin: "Pen.", pre: "Maç öncesi",
       reconnecting: "Yeniden bağlanıyor…", connecting: "Bağlanıyor…", powered: "Altyapı:",
-      waiting: "Anlatım başlama düdüğüyle başlar.", jersey: "forma"
+      waiting: "Anlatım başlama düdüğüyle başlar.", jersey: "forma",
+      yourAgent: "Ajanın", agentGot: "Ajanın bunu senin için ayarladı"
     }
   };
   var T = STR[lang];
@@ -169,6 +177,7 @@
   $("pensLabel").textContent = T.pens;
   $("poweredBy").innerHTML = esc(T.powered) + " <b>Matchday OS</b>";
   $("gwWord").textContent = T.goal;
+  $("offerBy").textContent = T.agentGot;
 
   // server system lines can carry emoji; the UI stays text-only
   function plain(t) { return String(t).replace(/\p{Extended_Pictographic}\uFE0F?/gu, "").replace(/^\s+/, ""); }
@@ -279,9 +288,16 @@
     if (m.type === "state" || m.type === "score") m.minute = clockOf(m);
     if (m.item) m.item.minute = clockOf(m.item);
     if (Array.isArray(m.feed)) {
-      // Personal items (answers, order confirmations) arrive live and are kept in `local` already.
+      // Personal items (answers, order confirmations, notes from the fan's agent) arrive live and
+      // are kept in `local`. Keep the ones we have not seen (e.g. after a reload) with their anchor.
+      var anchor = null;
+      m.personal = [];
+      m.feed.forEach(function (it) {
+        it.minute = clockOf(it);
+        if (it.personal) m.personal.push({ id: it.id, kind: it.kind, text: it.text, minute: it.minute, agent: it.agent, after: anchor });
+        else anchor = it.id;
+      });
       m.feed = m.feed.filter(function (it) { return !it.personal; });
-      m.feed.forEach(function (it) { it.minute = clockOf(it); });
     }
     if (Array.isArray(m.predictions)) {
       var counts = {};
@@ -301,6 +317,9 @@
       S.feed = Array.isArray(m.feed) ? m.feed.slice() : [];
       S.predictions = m.predictions || {};
       if (!S.feed.length) { local = []; seen = {}; }
+      (m.personal || []).forEach(function (p) {
+        if (!local.some(function (x) { return x.id === p.id; })) local.push(p);
+      });
       if (myVote && !S.predictions[myVote]) myVote = null;
       setOffer(m.offer || null);
       renderScore(); renderFeed(); renderPredict();
@@ -317,6 +336,15 @@
       if (minuteChanged || dh || da) refreshMeta();
     } else if (m.type === "feed" && m.item) {
       var it = m.item;
+      if (it.agent || it.personal && it.kind === "commentary") {
+        // the fan's own agent (or anything else just for this fan): kept locally, never in S.feed,
+        // which the next state message replaces without personal items
+        if (!local.some(function (x) { return x.id === it.id; })) {
+          local.push({ id: it.id, kind: it.kind, text: it.text, minute: it.minute, agent: it.agent, after: lastServerId() });
+        }
+        renderFeed();
+        return;
+      }
       if (it.kind === "commentary" || it.kind === "system") {
         if (!S.feed.some(function (x) { return x.id === it.id; })) S.feed.push(it);
       }
@@ -401,7 +429,8 @@
     shot: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="8" cy="8" r="6"/><circle cx="8" cy="8" r="2.4"/></svg>',
     pen: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"><path d="M2 12V4h12v8"/><circle cx="8" cy="12.2" r="1.3" fill="currentColor" stroke="none"/></svg>',
     answer: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"><path d="M2.5 3h11v7.5H7L4 13v-2.5H2.5z"/></svg>',
-    note: '<svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="2" fill="currentColor"/></svg>'
+    note: '<svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="2" fill="currentColor"/></svg>',
+    agent: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="8" cy="5.5" r="2.6"/><path d="M3 14c.6-2.8 2.6-4.3 5-4.3s4.4 1.5 5 4.3"/></svg>'
   };
   var TYPE_IC = {
     goal: "goal", yellow_card: "yellow", red_card: "red", substitution: "sub",
@@ -418,6 +447,7 @@
     [/\b(whistle|kick-?off|half-?time|under way)\b|silbat|descanso|pitido|fishkëll|pushim|صافرة|استراحة|انطلق/i, ["kickoff", "half_end", "full_time"]]
   ];
   function iconFor(it, list) {
+    if (it.agent) return IC.agent;
     if (it.kind === "answer" || it.kind === "question" || it.kind === "pending") return IC.answer;
     if (it.kind === "system") return IC.note;
     if (isGoalItem(it, list)) return IC.goal;
@@ -448,7 +478,8 @@
       var cls = "item";
       var lbl = "";
       var style = "";
-      if (it.kind === "question" || it.kind === "pending") {
+      if (it.agent) { cls += " agent"; lbl = T.yourAgent; }
+      else if (it.kind === "question" || it.kind === "pending") {
         cls += " question";
         lbl = it.kind === "pending" ? T.youAsked + " · " + T.thinking : T.youAsked;
       } else if (it.kind === "answer") { cls += " answer"; lbl = T.answer; }
@@ -460,7 +491,7 @@
       } else if (it.minute === "PENS") cls += " pens-item";
       if (isNew) cls += " new";
       var minute = it.kind === "question" || it.kind === "pending" ? "" : '<span class="min">' + esc(displayMinute(it.minute)) + "</span>";
-      html.push('<li class="' + cls + '"' + style + ">" + minute + '<span class="ic" aria-hidden="true">' + iconFor(it, list) + "</span>" + '<div class="txt">' + (lbl ? '<span class="lbl">' + esc(lbl) + "</span>" : "") + esc(it.kind === "system" ? plain(it.text) : it.text) + "</div></li>");
+      html.push('<li class="' + cls + '"' + style + ">" + minute + '<span class="ic" aria-hidden="true">' + iconFor(it, list) + "</span>" + '<div class="txt">' + (lbl ? '<span class="lbl">' + esc(lbl) + "</span>" : "") + (it.agent ? '<span dir="auto">' + esc(plain(it.text)) + "</span>" : esc(it.kind === "system" ? plain(it.text) : it.text)) + "</div></li>");
     }
     var keepTop = feed.scrollTop < 8;
     feed.innerHTML = html.join("");
@@ -558,6 +589,8 @@
     var team = teamOf[o.player] || homeName();
     $("jersey").innerHTML = jerseySvg(o.player, team);
     $("offerTitle").textContent = o.title || (o.player + " " + T.jersey);
+    $("offerBy").hidden = !o.personal;
+    $("sheet").classList.toggle("personal", !!o.personal);
     // priceEur is the final price; originalPriceEur (optional) is the struck-through one.
     var was = o.originalPriceEur || Math.round((o.priceEur / (1 - (o.discountPct || 0) / 100)) * 100) / 100;
     $("priceNow").textContent = price(o.priceEur);

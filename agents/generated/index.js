@@ -14,9 +14,35 @@ export {
 /**
  * Call actor methods from your backend.
  * @example
- * const actor = actors.MatchRoom.get("actor-id")
+ * const actor = actors.FanAgent.get("actor-id")
  */
 export const actors = {
+    ["FanAgent"]: {
+        get(actorId, transport) {
+            return $createActorStub(
+                "FanAgent",
+                actorId,
+                [
+                    { name: "get", result: "value" },
+                    { name: "load", result: "value" },
+                    { name: "markSeen", result: "void" },
+                    { name: "recordNote", result: "void" },
+                    { name: "recordPick", result: "void" },
+                    { name: "recordPurchase", result: "void" },
+                    { name: "recordQuestion", result: "void" }
+                ],
+                transport
+            )
+        },
+        /**
+         * Allow a frontend connection after your backend checks the user's access.
+         * @example
+         * const grant = await actors.FanAgent.prepareWebsocket({ actorId: "actor-id", metadata })
+         */
+        prepareWebsocket(authorization, options = {}, dependencies = {}) {
+            return new ActorProxy(options, dependencies).handle({ ...authorization, actorName: "FanAgent" })
+        }
+    },
     ["MatchRoom"]: {
         get(actorId, transport) {
             return $createActorStub(
@@ -27,11 +53,13 @@ export const actors = {
                     { name: "decrementStock", result: "value" },
                     { name: "ensureTicking", result: "value" },
                     { name: "getCrowd", result: "value" },
+                    { name: "getFans", result: "value" },
                     { name: "getInventory", result: "value" },
                     { name: "getOrders", result: "value" },
                     { name: "getRoster", result: "value" },
                     { name: "getState", result: "value" },
                     { name: "getTimeline", result: "value" },
+                    { name: "getTimelineFrom", result: "value" },
                     { name: "hireAgent", result: "value" },
                     { name: "jumpTo", result: "value" },
                     { name: "pause", result: "value" },
@@ -41,13 +69,17 @@ export const actors = {
                     { name: "postExtraCommentary", result: "void" },
                     { name: "postLangAnswer", result: "void" },
                     { name: "postNugget", result: "void" },
+                    { name: "postPersonal", result: "void" },
                     { name: "registerAgents", result: "value" },
+                    { name: "removeFanAgent", result: "void" },
                     { name: "reset", result: "value" },
+                    { name: "sendPersonalOffer", result: "void" },
                     { name: "setAgentStatus", result: "void" },
                     { name: "setInventory", result: "value" },
                     { name: "setOffer", result: "void" },
                     { name: "setSpeed", result: "value" },
-                    { name: "start", result: "value" }
+                    { name: "start", result: "value" },
+                    { name: "upsertFanAgent", result: "void" }
                 ],
                 transport
             )
@@ -65,11 +97,11 @@ export const actors = {
 /**
  * Allow a frontend connection after your backend checks the user's access.
  * @example
- * const grant = await ActorProxy.handle({ actorName: "MatchRoom", actorId: "actor-id", metadata })
+ * const grant = await ActorProxy.handle({ actorName: "FanAgent", actorId: "actor-id", metadata })
  */
 export class ActorProxy extends $SocketProxy {
     constructor(options = {}, dependencies = {}) {
-        super({ ["MatchRoom"]: {} }, options, dependencies)
+        super({ ["FanAgent"]: {}, ["MatchRoom"]: {} }, options, dependencies)
     }
     handle(authorization) {
         return super.handle(authorization)

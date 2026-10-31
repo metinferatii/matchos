@@ -27,6 +27,7 @@ export const flags = {
     hiring: flag("HIRING"),
     negotiation: flag("NEGOTIATION"),
     initiative: flag("INITIATIVE"),
+    fanAgents: flag("FAN_AGENTS"),
 }
 
 export const MATCH_ID = process.argv[2] ?? "wc22-final"

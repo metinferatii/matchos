@@ -23,9 +23,24 @@ export type {
 /**
  * Types for actor state and socket messages.
  * @example
- * type State = actors.MatchRoom.State
+ * type State = actors.FanAgent.State
  */
 export declare namespace actors {
+    namespace FanAgent {
+        type Metadata = $ActorTypes["FanAgent"]["Metadata"]
+        type Incoming = $ActorTypes["FanAgent"]["Incoming"]
+        type Outgoing = $ActorTypes["FanAgent"]["Outgoing"]
+        type State = $ActorTypes["FanAgent"]["State"]
+        interface Authorization {
+            actorName: "FanAgent"
+            actorId: string
+            metadata: Metadata
+            clientLocation?: {
+                latitude: number
+                longitude: number
+            }
+        }
+    }
     namespace MatchRoom {
         type Metadata = $ActorTypes["MatchRoom"]["Metadata"]
         type Incoming = $ActorTypes["MatchRoom"]["Incoming"]
@@ -45,9 +60,75 @@ export declare namespace actors {
 /**
  * Types for actor state and methods.
  * @example
- * type State = actors.MatchRoom.State
+ * type State = actors.FanAgent.State
  */
 export declare namespace actors {
+    namespace FanAgent {
+        type Stub = $ActorTypes["FanAgent"]["Methods"]
+        interface $MethodTypes {
+            ["get"]: {
+                Args: Parameters<Stub["get"]>
+                Result: Awaited<ReturnType<Stub["get"]>>
+            }
+            ["load"]: {
+                Args: Parameters<Stub["load"]>
+                Result: Awaited<ReturnType<Stub["load"]>>
+            }
+            ["markSeen"]: {
+                Args: Parameters<Stub["markSeen"]>
+                Result: Awaited<ReturnType<Stub["markSeen"]>>
+            }
+            ["recordNote"]: {
+                Args: Parameters<Stub["recordNote"]>
+                Result: Awaited<ReturnType<Stub["recordNote"]>>
+            }
+            ["recordPick"]: {
+                Args: Parameters<Stub["recordPick"]>
+                Result: Awaited<ReturnType<Stub["recordPick"]>>
+            }
+            ["recordPurchase"]: {
+                Args: Parameters<Stub["recordPurchase"]>
+                Result: Awaited<ReturnType<Stub["recordPurchase"]>>
+            }
+            ["recordQuestion"]: {
+                Args: Parameters<Stub["recordQuestion"]>
+                Result: Awaited<ReturnType<Stub["recordQuestion"]>>
+            }
+        }
+        interface Methods extends $MethodTypes {}
+        /**
+         * Types for a method's arguments and return value.
+         * @example
+         * type Args = actors.FanAgent.Methods["get"]["Args"]
+         * type Result = actors.FanAgent.Methods["get"]["Result"]
+         */
+        namespace Methods {
+            namespace load {
+                type Args = $MethodTypes["load"]["Args"]
+                type Result = $MethodTypes["load"]["Result"]
+            }
+            namespace markSeen {
+                type Args = $MethodTypes["markSeen"]["Args"]
+                type Result = $MethodTypes["markSeen"]["Result"]
+            }
+            namespace recordNote {
+                type Args = $MethodTypes["recordNote"]["Args"]
+                type Result = $MethodTypes["recordNote"]["Result"]
+            }
+            namespace recordPick {
+                type Args = $MethodTypes["recordPick"]["Args"]
+                type Result = $MethodTypes["recordPick"]["Result"]
+            }
+            namespace recordPurchase {
+                type Args = $MethodTypes["recordPurchase"]["Args"]
+                type Result = $MethodTypes["recordPurchase"]["Result"]
+            }
+            namespace recordQuestion {
+                type Args = $MethodTypes["recordQuestion"]["Args"]
+                type Result = $MethodTypes["recordQuestion"]["Result"]
+            }
+        }
+    }
     namespace MatchRoom {
         type Stub = $ActorTypes["MatchRoom"]["Methods"]
         interface $MethodTypes {
@@ -66,6 +147,10 @@ export declare namespace actors {
             ["getCrowd"]: {
                 Args: Parameters<Stub["getCrowd"]>
                 Result: Awaited<ReturnType<Stub["getCrowd"]>>
+            }
+            ["getFans"]: {
+                Args: Parameters<Stub["getFans"]>
+                Result: Awaited<ReturnType<Stub["getFans"]>>
             }
             ["getInventory"]: {
                 Args: Parameters<Stub["getInventory"]>
@@ -86,6 +171,10 @@ export declare namespace actors {
             ["getTimeline"]: {
                 Args: Parameters<Stub["getTimeline"]>
                 Result: Awaited<ReturnType<Stub["getTimeline"]>>
+            }
+            ["getTimelineFrom"]: {
+                Args: Parameters<Stub["getTimelineFrom"]>
+                Result: Awaited<ReturnType<Stub["getTimelineFrom"]>>
             }
             ["hireAgent"]: {
                 Args: Parameters<Stub["hireAgent"]>
@@ -123,13 +212,25 @@ export declare namespace actors {
                 Args: Parameters<Stub["postNugget"]>
                 Result: Awaited<ReturnType<Stub["postNugget"]>>
             }
+            ["postPersonal"]: {
+                Args: Parameters<Stub["postPersonal"]>
+                Result: Awaited<ReturnType<Stub["postPersonal"]>>
+            }
             ["registerAgents"]: {
                 Args: Parameters<Stub["registerAgents"]>
                 Result: Awaited<ReturnType<Stub["registerAgents"]>>
             }
+            ["removeFanAgent"]: {
+                Args: Parameters<Stub["removeFanAgent"]>
+                Result: Awaited<ReturnType<Stub["removeFanAgent"]>>
+            }
             ["reset"]: {
                 Args: Parameters<Stub["reset"]>
                 Result: Awaited<ReturnType<Stub["reset"]>>
+            }
+            ["sendPersonalOffer"]: {
+                Args: Parameters<Stub["sendPersonalOffer"]>
+                Result: Awaited<ReturnType<Stub["sendPersonalOffer"]>>
             }
             ["setAgentStatus"]: {
                 Args: Parameters<Stub["setAgentStatus"]>
@@ -150,6 +251,10 @@ export declare namespace actors {
             ["start"]: {
                 Args: Parameters<Stub["start"]>
                 Result: Awaited<ReturnType<Stub["start"]>>
+            }
+            ["upsertFanAgent"]: {
+                Args: Parameters<Stub["upsertFanAgent"]>
+                Result: Awaited<ReturnType<Stub["upsertFanAgent"]>>
             }
         }
         interface Methods extends $MethodTypes {}
@@ -176,6 +281,10 @@ export declare namespace actors {
                 type Args = $MethodTypes["getCrowd"]["Args"]
                 type Result = $MethodTypes["getCrowd"]["Result"]
             }
+            namespace getFans {
+                type Args = $MethodTypes["getFans"]["Args"]
+                type Result = $MethodTypes["getFans"]["Result"]
+            }
             namespace getInventory {
                 type Args = $MethodTypes["getInventory"]["Args"]
                 type Result = $MethodTypes["getInventory"]["Result"]
@@ -195,6 +304,10 @@ export declare namespace actors {
             namespace getTimeline {
                 type Args = $MethodTypes["getTimeline"]["Args"]
                 type Result = $MethodTypes["getTimeline"]["Result"]
+            }
+            namespace getTimelineFrom {
+                type Args = $MethodTypes["getTimelineFrom"]["Args"]
+                type Result = $MethodTypes["getTimelineFrom"]["Result"]
             }
             namespace hireAgent {
                 type Args = $MethodTypes["hireAgent"]["Args"]
@@ -232,13 +345,25 @@ export declare namespace actors {
                 type Args = $MethodTypes["postNugget"]["Args"]
                 type Result = $MethodTypes["postNugget"]["Result"]
             }
+            namespace postPersonal {
+                type Args = $MethodTypes["postPersonal"]["Args"]
+                type Result = $MethodTypes["postPersonal"]["Result"]
+            }
             namespace registerAgents {
                 type Args = $MethodTypes["registerAgents"]["Args"]
                 type Result = $MethodTypes["registerAgents"]["Result"]
             }
+            namespace removeFanAgent {
+                type Args = $MethodTypes["removeFanAgent"]["Args"]
+                type Result = $MethodTypes["removeFanAgent"]["Result"]
+            }
             namespace reset {
                 type Args = $MethodTypes["reset"]["Args"]
                 type Result = $MethodTypes["reset"]["Result"]
+            }
+            namespace sendPersonalOffer {
+                type Args = $MethodTypes["sendPersonalOffer"]["Args"]
+                type Result = $MethodTypes["sendPersonalOffer"]["Result"]
             }
             namespace setAgentStatus {
                 type Args = $MethodTypes["setAgentStatus"]["Args"]
@@ -260,15 +385,32 @@ export declare namespace actors {
                 type Args = $MethodTypes["start"]["Args"]
                 type Result = $MethodTypes["start"]["Result"]
             }
+            namespace upsertFanAgent {
+                type Args = $MethodTypes["upsertFanAgent"]["Args"]
+                type Result = $MethodTypes["upsertFanAgent"]["Result"]
+            }
         }
     }
 }
 /**
  * Call actor methods from your backend.
  * @example
- * const actor = actors.MatchRoom.get("actor-id")
+ * const actor = actors.FanAgent.get("actor-id")
  */
 export declare const actors: {
+    FanAgent: {
+        get(actorId: string, transport?: import("./terse-transport.js").ActorRpcTransport): actors.FanAgent.Stub
+        /**
+         * Allow a frontend connection after your backend checks the user's access.
+         * @example
+         * const grant = await actors.FanAgent.prepareWebsocket({ actorId: "actor-id", metadata })
+         */
+        prepareWebsocket(
+            authorization: Omit<actors.FanAgent.Authorization, "actorName">,
+            options?: import("./terse-transport.js").SocketProxyOptions,
+            dependencies?: import("./terse-transport.js").SocketProxyDependencies
+        ): Promise<import("./terse-transport.js").SocketGrant>
+    }
     MatchRoom: {
         get(actorId: string, transport?: import("./terse-transport.js").ActorRpcTransport): actors.MatchRoom.Stub
         /**
@@ -286,15 +428,16 @@ export declare const actors: {
 /**
  * The actor and connection details approved by your backend.
  * @example
- * const authorization: ActorAuthorization = { actorName: "MatchRoom", actorId: "actor-id", metadata }
+ * const authorization: ActorAuthorization = { actorName: "FanAgent", actorId: "actor-id", metadata }
  */
-export type ActorAuthorization = actors.MatchRoom.Authorization
+export type ActorAuthorization = actors.FanAgent.Authorization | actors.MatchRoom.Authorization
 /**
  * Allow a frontend connection after your backend checks the user's access.
  * @example
- * const grant = await ActorProxy.handle({ actorName: "MatchRoom", actorId: "actor-id", metadata })
+ * const grant = await ActorProxy.handle({ actorName: "FanAgent", actorId: "actor-id", metadata })
  */
 export declare class ActorProxy extends $SocketProxy<{
+    ["FanAgent"]: import("./terse-transport.js").ProxyActor<actors.FanAgent.Metadata>
     ["MatchRoom"]: import("./terse-transport.js").ProxyActor<actors.MatchRoom.Metadata>
 }> {
     constructor(

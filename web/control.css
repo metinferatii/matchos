@@ -172,3 +172,30 @@ figcaption .host { margin-inline-start: auto; }
 .langs { display: none; }
 .phone:hover .langs { display: inline-flex; opacity: 1; }
 .phone:hover figcaption > span:first-child { display: none; }
+
+/* Fan agents: one per connected fan, under the newsroom roster */
+:root { --fan: #b8b2a6; }
+.fanagents { flex: none; margin: 0 0 12px; padding: 0 0 12px; border-bottom: 1px solid var(--line); font-size: 13px; }
+.fa-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding-bottom: 4px; }
+.fa-head span:first-child { font-weight: 600; color: var(--muted); }
+.fa-head span:last-child { color: var(--dim); font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.fa-list { list-style: none; margin: 0; padding: 0; }
+.fa-list li { display: grid; grid-template-columns: 8px minmax(96px, auto) 28px minmax(0, 1fr); align-items: baseline; column-gap: 10px; padding: 3px 0; }
+.fa-list .st { width: 6px; height: 6px; border-radius: 50%; background: var(--line); align-self: center; transition: background .2s; }
+.fa-list li.working .st { background: var(--fan); }
+.fa-list b { font-weight: 600; color: var(--fan); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.fa-list .lc { color: var(--muted); }
+.fa-list .pk { color: var(--dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.fa-list .pk em { font-style: normal; color: var(--text); }
+.fa-list li.more { display: block; color: var(--dim); padding-inline-start: 18px; }
+.fa-list li.new { animation: rowin .2s ease-out; }
+
+/* Leave / Return: the phone's fan steps away so their agent can catch them up */
+.away-btn { margin-inline-start: auto; border: 0; background: none; padding: 0 2px; font-size: 12px; color: var(--dim); cursor: pointer; }
+.away-btn:hover { color: var(--text); }
+.phone:hover .away-btn { margin-inline-start: 0; }
+.phone.left .away-btn { color: var(--accent); }
+.away-note { position: absolute; inset: 0; display: none; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 16px; text-align: center; font-size: 13px; color: var(--muted); }
+.away-note b { color: var(--text); font-weight: 600; }
+.phone.left .away-note { display: flex; }
+.phone.left .screen iframe { visibility: hidden; }

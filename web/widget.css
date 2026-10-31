@@ -93,6 +93,10 @@ button, input { font: inherit; color: inherit; }
 .item.question .ic { justify-self: end; }
 .item.question .lbl { color: var(--dim); }
 .item.system .txt { color: var(--muted); }
+/* A note from the fan's own agent: a personal line, set off by a thin accent rule. */
+.item.agent { border-inline-start: 2px solid var(--accent); padding-inline-start: 8px; grid-template-columns: 32px 16px minmax(0, 1fr); }
+.item.agent .ic { color: var(--accent); }
+.item.agent .lbl { color: var(--accent); }
 .empty { color: var(--muted); padding: 24px 0; text-align: center; font-size: 13px; }
 
 /* ---------- Ask ---------- */
@@ -144,6 +148,8 @@ button, input { font: inherit; color: inherit; }
 .countdown b { color: var(--text); font-weight: 700; font-variant-numeric: tabular-nums; direction: ltr; unicode-bidi: isolate; }
 .sheet-main { display: grid; grid-template-columns: 56px minmax(0, 1fr); gap: 12px; align-items: center; padding: 10px 0 12px; }
 .jersey svg { display: block; width: 56px; height: auto; }
+.offer-by { margin: 0 0 2px; font-size: 12px; font-weight: 600; color: var(--accent); }
+.docked .offer-by { display: none; }
 .offer-info h3 { margin: 0 0 4px; font-size: 13px; font-weight: 600; line-height: 1.3; }
 .price { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; font-variant-numeric: tabular-nums; }
 .price .now { font-family: var(--font-title); font-weight: 800; font-size: 20px; }
@@ -160,7 +166,9 @@ button, input { font: inherit; color: inherit; }
 .docked .sheet-top { display: none; }
 .docked .sheet-main { grid-template-columns: 26px minmax(0, 1fr); gap: 10px; padding: 0; }
 .docked .jersey svg { width: 26px; }
-.docked .offer-info h3 { margin: 0; font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.docked .offer-by { margin: 0 0 2px; font-size: 12px; font-weight: 600; color: var(--accent); }
+.docked .offer-by { display: none; }
+.offer-info h3 { margin: 0; font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .docked .price { gap: 6px; }
 .docked .price .now { font-size: 14px; }
 .docked .price .was { font-size: 11px; }
