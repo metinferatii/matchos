@@ -11,7 +11,7 @@
 //   bun agents/matchday-agents.ts [matchId]
 import type { Lang, MatchEvent, Offer } from "../shared/contract"
 import { templateLine } from "../shared/templates"
-import { EVENTS, MATCH_ID, MODEL, Member, RUN, STEP_MS, budget, describe, flags, goalsBy, isGoal, llm, room, supabase, tick } from "./core"
+import { EVENTS, FAST_MODEL, MATCH_ID, MODEL, Member, RUN, STEP_MS, budget, describe, flags, goalsBy, isGoal, llm, room, supabase, tick } from "./core"
 import { actors } from "./generated/index.js"
 import { LANG_NAME, releaseHires, restoreHires, startHiring } from "./hiring"
 import { startInitiative } from "./initiative"
@@ -74,8 +74,9 @@ commentator.on(async m => {
         await commentator.post("producer", line, { kind: "draft", ref: e.id, data: { eventId: e.id, line, tone: d.tone, timeoutMs: reviewMs - 80 } })
         const v = await verdict
         if (v?.kind === "rejection") {
+            // The rewrite has whatever is left of the budget, so it uses the fast model.
             const rewrite = await llm(COMMENTATOR, `${context}\nYour draft: ${line}\nThe producer rejected it: ${v.data?.reason}. Rewrite it.`, {
-                temperature: 0.8, timeoutMs: Math.max(400, Math.min(1000, deadline - Date.now() - 100)),
+                temperature: 0.8, model: FAST_MODEL, maxTokens: 60, timeoutMs: Math.max(500, Math.min(1000, deadline - Date.now() + 300)),
             })
             if (rewrite) line = rewrite.replace(/^"|"$/g, "")
         }
