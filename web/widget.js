@@ -635,12 +635,14 @@
   function setConn(ok) {
     connected = ok;
     clearTimeout(connTimer);
-    if (ok) { $("conn").hidden = true; return; }
-    // only surface it if the gap is noticeable
+    if (ok) { $("conn").hidden = true; root.classList.remove("offline"); $("feedTitle").textContent = T.live; return; }
+    // only surface it if the gap is noticeable: the title says so and the score dims until we're back
     connTimer = setTimeout(function () {
       if (connected) return;
-      $("connText").textContent = everConnected ? T.reconnecting : T.connecting;
-      $("conn").hidden = false;
+      var text = everConnected ? T.reconnecting : T.connecting;
+      $("connText").textContent = text;
+      $("feedTitle").textContent = text;
+      root.classList.add("offline");
     }, everConnected ? 600 : 1200);
   }
   function connect() {
@@ -652,9 +654,15 @@
     }).then(function (j) {
       var sock = new WebSocket(j.websocketUrl);
       ws = sock;
-      sock.onopen = function () { everConnected = true; setConn(true); refreshMeta(); };
-      sock.onmessage = function (e) { try { onMessage(JSON.parse(e.data)); } catch (err) {} };
-      sock.onclose = function () { if (ws === sock) { ws = null; setConn(false); retry(); } };
+      // Live only once the match's state arrives: the gateway accepts the socket even while the
+      // match server is down, so "open" alone would flicker back to Live on every retry.
+      var live = false;
+      sock.onmessage = function (e) {
+        var m; try { m = JSON.parse(e.data); } catch (err) { return; }
+        if (!live && m.type === "state") { live = true; everConnected = true; setConn(true); refreshMeta(); }
+        try { onMessage(m); } catch (err) {}
+      };
+      sock.onclose = function () { if (ws === sock) { ws = null; if (live || !everConnected) setConn(false); retry(); } };
       sock.onerror = function () { try { sock.close(); } catch (err) {} };
     }).catch(function () { setConn(false); retry(); });
   }

@@ -14,3 +14,6 @@ agents/.relay-engine/package-lock.json
 
 # Raw StatsBomb downloads (scripts/build-match.ts re-fetches them)
 data/raw/
+
+# Demo recordings
+demo/out/

@@ -3,6 +3,7 @@
 #   ./scripts/dev.sh          start everything (logs in .logs/)
 #   ./scripts/dev.sh stop     stop everything
 #   ./scripts/dev.sh actor    restart only the actor server (the restart demo)
+#   ./scripts/dev.sh actor-stop | actor-start   the same in two steps, to hold the outage on stage
 cd "$(dirname "$0")/.."
 export PATH="$HOME/.bun/bin:$PATH"
 mkdir -p .logs
@@ -20,6 +21,12 @@ stop)
     ;;
 actor)
     stop_actor; sleep 1; start_actor; echo "actor server restarted"
+    ;;
+actor-stop)
+    stop_actor; echo "actor server stopped"
+    ;;
+actor-start)
+    start_actor; echo "actor server started"
     ;;
 start)
     ./scripts/sync-shared.sh
