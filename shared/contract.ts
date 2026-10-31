@@ -44,6 +44,9 @@ export type Predictions = Prediction[]
 export type AgentKind = "directive" | "draft" | "rejection" | "proposal" | "counter" | "agreement" | "hire" | "initiative" | "note"
 export type AgentMsg = { from: string; to: string; text: string; ts: number; kind?: AgentKind }
 
+// Club ops rules for merch: jersey stock, max discount and allowed bundles per player (Supabase `inventory`).
+export type InventoryItem = { player: string; team: string; stock: number; maxDiscountPct: number; bundles: string[] }
+
 // Who is in the newsroom. Hired agents record who hired them and when; persisted in the actor.
 export type RosterEntry = { name: string; role: string; lang?: FanLang; hiredBy?: string; hiredAt?: number; status: "idle" | "working" }
 

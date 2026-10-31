@@ -24,7 +24,9 @@ export const actors = {
                 actorId,
                 [
                     { name: "confirmOrder", result: "void" },
+                    { name: "decrementStock", result: "value" },
                     { name: "ensureTicking", result: "value" },
+                    { name: "getInventory", result: "value" },
                     { name: "getOrders", result: "value" },
                     { name: "getRoster", result: "value" },
                     { name: "getState", result: "value" },
@@ -39,6 +41,7 @@ export const actors = {
                     { name: "registerAgents", result: "value" },
                     { name: "reset", result: "value" },
                     { name: "setAgentStatus", result: "void" },
+                    { name: "setInventory", result: "value" },
                     { name: "setOffer", result: "void" },
                     { name: "setSpeed", result: "value" },
                     { name: "start", result: "value" }

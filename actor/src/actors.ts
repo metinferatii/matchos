@@ -1,7 +1,7 @@
 import { Actor, Persisted, type ActorSocket } from "terse-sdk/actor"
 import match from "./match.json" with { type: "json" }
 import { templateLine } from "./templates.js"
-import type { AgentKind, AgentMsg, ClientMsg, ExtraLang, FanLang, FeedItem, Lang, MatchEvent, Offer, Predictions, RosterEntry, Score, ServerMsg, SocketMeta } from "./contract.js"
+import type { AgentKind, AgentMsg, ClientMsg, ExtraLang, FanLang, FeedItem, InventoryItem, Lang, MatchEvent, Offer, Predictions, RosterEntry, Score, ServerMsg, SocketMeta } from "./contract.js"
 
 const EVENTS = match.events as MatchEvent[]
 const LANGS: Lang[] = ["en", "sq", "es", "ar"]
@@ -52,6 +52,7 @@ export type RoomState = {
     orders: number
     roster: RosterEntry[]
     languages: FanLang[]
+    inventory: Record<string, InventoryItem>
 }
 
 /** One live match. The replay clock is the actor alarm; every field survives a restart. */
@@ -75,6 +76,8 @@ export class MatchRoom extends Actor<SocketMeta, ClientMsg, Outgoing> {
     // The newsroom roster, and feeds for languages covered by hired translators.
     @Persisted roster: RosterEntry[] = []
     @Persisted extraFeed: Record<string, FeedItem[]> = {}
+    // Cached club ops inventory; stock lives here during the match so it survives restarts.
+    @Persisted inventory: Record<string, InventoryItem> = {}
 
     // ---- Replay control ----
 
@@ -198,6 +201,28 @@ export class MatchRoom extends Actor<SocketMeta, ClientMsg, Outgoing> {
         await this.setOfferNow(offer)
     }
 
+    // ---- Club ops inventory (merch negotiation) ----
+
+    /** Loads the inventory; keeps the cached stock unless `replace` (e.g. reseeding on reset). */
+    async setInventory(items: InventoryItem[], replace = false): Promise<Record<string, InventoryItem>> {
+        if (replace || Object.keys(this.inventory).length === 0)
+            this.inventory = Object.fromEntries(items.map(i => [i.player, i]))
+        return this.inventory
+    }
+
+    async getInventory(): Promise<Record<string, InventoryItem>> {
+        return this.inventory
+    }
+
+    /** A jersey sold: one less in stock. Returns the new stock, or null for an unknown player. */
+    async decrementStock(player: string): Promise<number | null> {
+        const item = this.inventory[player]
+        if (!item) return null
+        const stock = Math.max(0, item.stock - 1)
+        this.inventory = { ...this.inventory, [player]: { ...item, stock } }
+        return stock
+    }
+
     // ---- Newsroom roster (live hiring) ----
 
     /** The agents process registers its base team on start; hired agents already on the roster stay. */
@@ -269,6 +294,7 @@ export class MatchRoom extends Actor<SocketMeta, ClientMsg, Outgoing> {
             orders: this.orders.length,
             roster: this.roster,
             languages: coveredLangs(this.roster),
+            inventory: this.inventory,
         }
     }
 

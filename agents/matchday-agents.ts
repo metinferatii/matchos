@@ -14,16 +14,17 @@ import { templateLine } from "../shared/templates"
 import { EVENTS, MATCH_ID, MODEL, Member, RUN, STEP_MS, budget, describe, flags, goalsBy, isGoal, llm, room, supabase, tick } from "./core"
 import { actors } from "./generated/index.js"
 import { LANG_NAME, releaseHires, restoreHires, startHiring } from "./hiring"
+import { JERSEY, loadInventory, negotiateOffer, recordSale, reseedInventory, startClubOps } from "./negotiation"
 import { ruleDirective, startProducer, type Directive } from "./producer"
 
-const names = ["ingest", "commentator", "translator", "stats", "merch", ...(flags.producer ? ["producer"] : [])]
+const names = ["ingest", "commentator", "translator", "stats", "merch", ...(flags.producer ? ["producer"] : []), ...(flags.negotiation ? ["club-ops"] : [])]
 const members = Object.fromEntries(await Promise.all(names.map(async n => [n, await Member.join(n)] as const)))
 const { ingest, commentator, translator, stats, merch } = members
 console.log(`Newsroom online for ${MATCH_ID} (run ${RUN}, model ${MODEL}) flags ${JSON.stringify(flags)}`)
 
 const ROLES: Record<string, string> = {
     ingest: "match data", producer: "editor", commentator: "commentary", translator: "translator (sq, es, ar)",
-    stats: "facts and answers", merch: "flash offers",
+    stats: "facts and answers", merch: "flash offers", "club-ops": "stock and pricing rules",
 }
 await room.registerAgents(names.map(n => ({ name: n, role: ROLES[n] ?? n })))
 
@@ -107,10 +108,14 @@ translator.on(async m => {
     await translator.post("all", `sq: ${lines.sq} · es: ${lines.es} · ar: ${lines.ar}`)
 }, ["translators"])
 
-// ---- merch: a 10-minute flash offer on the scorer's jersey (NEGOTIATION upgrades this) ----
+// ---- merch: a 10-minute flash offer on the scorer's jersey, negotiated with club-ops ----
 
-export const JERSEY: Record<string, number> = { Messi: 10, "Di María": 11, Mbappé: 10, "Kolo Muani": 12, Dybala: 21, Paredes: 5, Montiel: 4 }
-export const defaultOffer = (e: MatchEvent): Offer => ({
+if (flags.negotiation) {
+    startClubOps(members["club-ops"])
+    await loadInventory()
+}
+
+const defaultOffer = (e: MatchEvent): Offer => ({
     id: crypto.randomUUID(),
     player: e.player!,
     title: `${e.player} #${JERSEY[e.player!] ?? 10} ${e.team} home jersey`,
@@ -125,9 +130,10 @@ merch.on(async m => {
     const e = EVENTS[m.data.eventId]
     if (!e || !isGoal(e) || !e.player) return
     if (!(await directiveFor(merch, e)).act.includes("merch")) return
-    const offer = defaultOffer(e)
+    const offer = flags.negotiation ? await merch.task(() => negotiateOffer(merch, e)) : defaultOffer(e)
+    if (!offer) return
     await room.setOffer(offer)
-    await merch.post("all", `Flash offer: ${offer.title}, ${offer.discountPct}% off for 10 min`)
+    await merch.post("all", `Flash offer live: ${offer.title}, €${offer.priceEur.toFixed(2)} (${offer.discountPct}% off) for 10 min.`)
 })
 
 merch.on(async m => {
@@ -137,6 +143,7 @@ merch.on(async m => {
     const saved = await supabase.upsert("orders", { id: order.id, match_id: MATCH_ID, user_id: order.userId, offer: { ...order.offer, paidEur: price } })
     await room.confirmOrder(order.id, price)
     await merch.post("all", `Sold ${order.offer.title} for €${price.toFixed(2)}${saved ? " · saved to Supabase" : ""}`)
+    if (flags.negotiation) await recordSale(members["club-ops"], order.offer)
 })
 
 // ---- stats: prep notes on big moments, and answers to fan questions ----
@@ -197,6 +204,7 @@ async function onActorMessage(msg: any) {
         await ingest.post("producer", `A fan joined in ${LANG_NAME[lang] ?? lang}. No translator covers ${lang}.`, { kind: "note", data: { languageNeeded: { lang, fans } } })
     } else if (msg.type === "reset") {
         releaseHires()
+        if (flags.negotiation) await reseedInventory()
     } else if (msg.type === "order") {
         await ingest.post("merch", `Order from ${msg.order.userId}: ${msg.order.offer.title}`, { data: { order: msg.order } })
     }

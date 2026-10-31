@@ -55,9 +55,17 @@ export declare namespace actors {
                 Args: Parameters<Stub["confirmOrder"]>
                 Result: Awaited<ReturnType<Stub["confirmOrder"]>>
             }
+            ["decrementStock"]: {
+                Args: Parameters<Stub["decrementStock"]>
+                Result: Awaited<ReturnType<Stub["decrementStock"]>>
+            }
             ["ensureTicking"]: {
                 Args: Parameters<Stub["ensureTicking"]>
                 Result: Awaited<ReturnType<Stub["ensureTicking"]>>
+            }
+            ["getInventory"]: {
+                Args: Parameters<Stub["getInventory"]>
+                Result: Awaited<ReturnType<Stub["getInventory"]>>
             }
             ["getOrders"]: {
                 Args: Parameters<Stub["getOrders"]>
@@ -115,6 +123,10 @@ export declare namespace actors {
                 Args: Parameters<Stub["setAgentStatus"]>
                 Result: Awaited<ReturnType<Stub["setAgentStatus"]>>
             }
+            ["setInventory"]: {
+                Args: Parameters<Stub["setInventory"]>
+                Result: Awaited<ReturnType<Stub["setInventory"]>>
+            }
             ["setOffer"]: {
                 Args: Parameters<Stub["setOffer"]>
                 Result: Awaited<ReturnType<Stub["setOffer"]>>
@@ -140,9 +152,17 @@ export declare namespace actors {
                 type Args = $MethodTypes["confirmOrder"]["Args"]
                 type Result = $MethodTypes["confirmOrder"]["Result"]
             }
+            namespace decrementStock {
+                type Args = $MethodTypes["decrementStock"]["Args"]
+                type Result = $MethodTypes["decrementStock"]["Result"]
+            }
             namespace ensureTicking {
                 type Args = $MethodTypes["ensureTicking"]["Args"]
                 type Result = $MethodTypes["ensureTicking"]["Result"]
+            }
+            namespace getInventory {
+                type Args = $MethodTypes["getInventory"]["Args"]
+                type Result = $MethodTypes["getInventory"]["Result"]
             }
             namespace getOrders {
                 type Args = $MethodTypes["getOrders"]["Args"]
@@ -199,6 +219,10 @@ export declare namespace actors {
             namespace setAgentStatus {
                 type Args = $MethodTypes["setAgentStatus"]["Args"]
                 type Result = $MethodTypes["setAgentStatus"]["Result"]
+            }
+            namespace setInventory {
+                type Args = $MethodTypes["setInventory"]["Args"]
+                type Result = $MethodTypes["setInventory"]["Result"]
             }
             namespace setOffer {
                 type Args = $MethodTypes["setOffer"]["Args"]

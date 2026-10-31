@@ -22,9 +22,12 @@ interface $MatchRoomContract {
         personal: Record<string, FeedItem[]>
         roster: RosterEntry[]
         extraFeed: Record<string, FeedItem[]>
+        inventory: Record<string, InventoryItem>
     }
     Methods: {
         confirmOrder(orderId: string, paidEur: number): Promise<void>
+        /** A jersey sold: one less in stock. Returns the new stock, or null for an unknown player. */
+        decrementStock(player: string): Promise<number | null>
         /**
          * Re-arms the replay clock if it should be running but no alarm is pending, e.g. right after
          * the actor server restarts. The gateway calls this every couple of seconds as a watchdog.
@@ -33,6 +36,7 @@ interface $MatchRoomContract {
             rearmed: boolean
             alarm: number | null
         }>
+        getInventory(): Promise<Record<string, InventoryItem>>
         getOrders(): Promise<Order[]>
         getRoster(): Promise<RosterEntry[]>
         getState(): Promise<RoomState>
@@ -57,6 +61,8 @@ interface $MatchRoomContract {
         /** Clears everything back to before kick-off. */
         reset(): Promise<RoomState>
         setAgentStatus(name: string, status: "idle" | "working"): Promise<void>
+        /** Loads the inventory; keeps the cached stock unless `replace` (e.g. reseeding on reset). */
+        setInventory(items: InventoryItem[], replace?: boolean): Promise<Record<string, InventoryItem>>
         setOffer(offer: Offer | null): Promise<void>
         setSpeed(tickMs: number): Promise<RoomState>
         start(tickMs?: number): Promise<RoomState>
@@ -122,6 +128,13 @@ type FeedItem = {
     kind: "commentary" | "answer" | "system"
     text: string
     personal?: true
+}
+type InventoryItem = {
+    player: string
+    team: string
+    stock: number
+    maxDiscountPct: number
+    bundles: string[]
 }
 type Lang = "en" | "sq" | "es" | "ar"
 type LangFeeds = {
@@ -206,6 +219,7 @@ type RoomState = {
     orders: number
     roster: RosterEntry[]
     languages: FanLang[]
+    inventory: Record<string, InventoryItem>
 }
 type RoomStateMsg = Omit<
     Extract<
