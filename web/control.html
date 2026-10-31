@@ -3,113 +3,88 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Matchday OS · Control room</title>
+<title>Matchday OS control room</title>
 <link rel="stylesheet" href="tokens.css">
 <link rel="stylesheet" href="control.css">
 </head>
 <body>
 <div class="room">
   <header class="top">
-    <div class="brandmark">
-      <svg viewBox="0 0 32 32" aria-hidden="true"><rect x="1" y="1" width="30" height="30" rx="8" fill="#F5B425"/><path d="M8 22V10l8 7 8-7v12" fill="none" stroke="#071226" stroke-width="3.2" stroke-linejoin="round" stroke-linecap="round"/></svg>
-      <div><b>Matchday OS</b><span>Control room</span></div>
-    </div>
-    <div class="matchname" id="matchName">FIFA World Cup 2022 · Final</div>
-    <div class="topbug">
-      <span class="tflag" id="tHomeFlag"></span><b id="tHome">ARG</b>
-      <span class="tscore"><span id="tHs">0</span><i>–</i><span id="tAs">0</span></span>
-      <b id="tAway">FRA</b><span class="tflag" id="tAwayFlag"></span>
-      <span class="tmin" id="tMin">–</span>
-      <span class="tpens" id="tPens" hidden></span>
-    </div>
+    <b class="brand">Matchday OS</b>
+    <p class="status">
+      <span class="dot" id="liveDot"></span>
+      <span class="match"><span id="tHome">Argentina</span> <span class="tscore" id="tScore"><span id="tHs">0</span>–<span id="tAs">0</span></span> <span id="tAway">France</span></span>
+      <span class="sep">·</span><span id="tMin">Pre-match</span><span id="tPens" hidden></span>
+      <span class="sep">·</span><span class="meta" id="agentCount">5 agents</span>
+      <span class="sep">·</span><span class="meta">4 languages</span>
+      <span class="sep">·</span><span class="meta">3 fan surfaces</span>
+    </p>
     <div class="ops" id="ops">
-      <span class="conn" id="connApi" title="Match server"><i></i><span>Server</span></span>
-      <span class="conn" id="connWs" title="Live socket"><i></i><span>Socket</span></span>
-      <span class="opsep"></span>
-      <button id="btnPlay" type="button" title="Start / pause (Space)">Start</button>
+      <button id="btnPlay" type="button" title="Start or pause (Space)">Start</button>
       <div class="seg" id="speed" role="group" aria-label="Replay speed">
         <button type="button" data-ms="4000">4s</button><button type="button" data-ms="3000">3s</button><button type="button" data-ms="2000">2s</button>
       </div>
       <button id="btnGoal" type="button" title="Jump to just before the next goal (G)">Next goal</button>
       <button id="btnReset" type="button" title="Reset to kick-off (Shift+R)">Reset</button>
     </div>
+    <div class="health">
+      <span class="conn" id="connApi" title="Match server"></span>
+      <span class="conn" id="connWs" title="Live socket"></span>
+    </div>
   </header>
 
-  <aside class="agents">
-    <div class="panel-head">
-      <h2>Agent channel</h2>
-      <span class="chan">#match on Agent Relay</span>
+  <section class="col card data">
+    <h2 class="card-title">Match data in</h2>
+    <svg class="pitch" id="pitch" viewBox="-3 -3 126 86" preserveAspectRatio="xMidYMid meet" aria-label="Pitch">
+      <rect x="-3" y="-3" width="126" height="86" rx="1.5" fill="#203528"/>
+      <g fill="none" stroke="#3f5a48" stroke-width=".4">
+        <rect x="0" y="0" width="120" height="80"/>
+        <line x1="60" y1="0" x2="60" y2="80"/>
+        <circle cx="60" cy="40" r="10"/>
+        <rect x="0" y="18" width="18" height="44"/><rect x="0" y="30" width="6" height="20"/>
+        <rect x="102" y="18" width="18" height="44"/><rect x="114" y="30" width="6" height="20"/>
+        <path d="M18 32.7 A10 10 0 0 1 18 47.3"/><path d="M102 32.7 A10 10 0 0 0 102 47.3"/>
+        <rect x="-2" y="36" width="2" height="8"/><rect x="120" y="36" width="2" height="8"/>
+      </g>
+      <g id="markers"></g>
+      <line id="trail" x1="60" y1="40" x2="60" y2="40" stroke="#8f9f93" stroke-width=".35" stroke-dasharray="1 1"/>
+      <g id="ballGroup" class="ballg" style="transform: translate(60px, 40px)">
+        <circle r="1.6" fill="#f3f4e9"/>
+      </g>
+    </svg>
+    <div class="dir"><span><span id="dirHomeName">Argentina</span> attack right</span><span><span id="dirAwayName">France</span> attack left</span></div>
+
+    <div class="caption" id="eventCard">
+      <div class="ev-line"><span class="ev-min" id="evMin">0'</span> <span class="ev-type" id="evType">Waiting for kick-off</span></div>
+      <div class="ev-who" id="evWho"></div>
+      <div class="ev-detail" id="evDetail">Press Space to start the replay.</div>
     </div>
-    <div class="roster" id="roster"></div>
+
+    <ol class="recent" id="recent"></ol>
+
+    <div class="timeline" id="timeline" aria-label="Match timeline"></div>
+    <p class="credit">Data: StatsBomb Open Data</p>
+  </section>
+
+  <section class="col card agents">
+    <div class="col-head"><h2 class="card-title">AI agent team</h2><span>Agent Relay · #match</span></div>
     <ol class="chat" id="chat"></ol>
-  </aside>
+  </section>
 
-  <section class="stage">
-    <div class="pitchrow">
-      <div class="pitchwrap">
-        <svg class="pitch" id="pitch" viewBox="-6 -6 132 92" preserveAspectRatio="xMidYMid meet">
-          <defs>
-            <pattern id="stripes" width="20" height="80" patternUnits="userSpaceOnUse">
-              <rect width="10" height="80" fill="#1C6A45"/><rect x="10" width="10" height="80" fill="#1A6240"/>
-            </pattern>
-            <radialGradient id="glow"><stop offset="0" stop-color="#F5B425" stop-opacity=".9"/><stop offset="1" stop-color="#F5B425" stop-opacity="0"/></radialGradient>
-          </defs>
-          <rect x="-6" y="-6" width="132" height="92" rx="3" fill="#175B3B"/>
-          <rect x="0" y="0" width="120" height="80" fill="url(#stripes)"/>
-          <g class="lines" fill="none" stroke="rgba(255,255,255,.75)" stroke-width=".45">
-            <rect x="0" y="0" width="120" height="80"/>
-            <line x1="60" y1="0" x2="60" y2="80"/>
-            <circle cx="60" cy="40" r="10"/>
-            <rect x="0" y="18" width="18" height="44"/><rect x="0" y="30" width="6" height="20"/>
-            <rect x="102" y="18" width="18" height="44"/><rect x="114" y="30" width="6" height="20"/>
-            <path d="M18 32.7 A10 10 0 0 1 18 47.3"/><path d="M102 32.7 A10 10 0 0 0 102 47.3"/>
-            <rect x="-2.4" y="36" width="2.4" height="8"/><rect x="120" y="36" width="2.4" height="8"/>
-          </g>
-          <g fill="rgba(255,255,255,.8)"><circle cx="60" cy="40" r=".6"/><circle cx="12" cy="40" r=".5"/><circle cx="108" cy="40" r=".5"/></g>
-          <g id="markers"></g>
-          <line id="trail" x1="60" y1="40" x2="60" y2="40" stroke="rgba(255,255,255,.55)" stroke-width=".5" stroke-dasharray="1.2 1"/>
-          <g id="ballGroup" class="ballg" style="transform: translate(60px, 40px)">
-            <circle id="halo" r="7" fill="url(#glow)" opacity="0"/>
-            <circle r="1.7" fill="#fff" stroke="#071226" stroke-width=".35"/>
-          </g>
-        </svg>
-        <div class="dir">
-          <span><i class="tflag" id="dirHome"></i><b id="dirHomeName">Argentina</b> attack right</span>
-          <span class="legend"><i class="lg goal"></i>Goal <i class="lg shot"></i>Shot <i class="lg card"></i>Card</span>
-          <span><b id="dirAwayName">France</b> attack left<i class="tflag" id="dirAway"></i></span>
-        </div>
-        <div class="goalflash" id="goalFlash"><span class="gf-word">GOAL</span><span class="gf-who" id="gfWho"></span></div>
-      </div>
-      <div class="eventcard" id="eventCard">
-        <div class="ev-min" id="evMin">0'</div>
-        <div class="ev-type" id="evType">Waiting for kick-off</div>
-        <div class="ev-who" id="evWho"></div>
-        <div class="ev-detail" id="evDetail">Press Start, or Space, to begin the replay.</div>
-        <div class="timeline" id="timeline" aria-label="Match timeline"></div>
-        <div class="stats">
-          <div><b id="stEvent">0 / 62</b><span>events replayed</span></div>
-          <div><b id="stVotes">0</b><span>live predictions</span></div>
-          <div><b id="stOrders">0</b><span>flash orders</span></div>
-          <div class="offer" id="stOffer"><b>No offer live</b><span>merch agent</span></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="surfaces">
-      <figure class="surface club">
-        <div class="browser">
-          <div class="bchrome"><i></i><i></i><i></i><span class="url">kestrel-bay.example/news</span></div>
-          <div class="screen" id="clubScreen"><iframe id="clubFrame" title="Club website" src="club.html"></iframe></div>
-        </div>
-        <figcaption><b>Club website</b><span>One script tag, English</span></figcaption>
-      </figure>
+  <section class="col card fans" id="fans">
+    <h2 class="card-title">Fans out</h2>
+    <figure class="surface club">
+      <div class="frame" id="clubScreen"><iframe id="clubFrame" title="Club website" src="club.html"></iframe></div>
+      <figcaption><span>Website</span><span class="lang">English</span><span class="host">Liga Demo match page</span></figcaption>
+    </figure>
+    <div class="phones">
       <figure class="surface phone" data-lang="sq">
-        <div class="device"><div class="notch"></div><div class="screen"><iframe title="Fan widget" data-user="stage-phone-1"></iframe></div></div>
-        <figcaption><b class="lname"></b><span class="langs"></span></figcaption>
+        <div class="device"><div class="screen"><iframe title="Fan widget" data-user="stage-phone-1"></iframe></div></div>
+        <figcaption><span>Phone</span><span class="lang lname"></span><span class="langs"></span></figcaption>
       </figure>
       <figure class="surface phone" data-lang="es">
-        <div class="device"><div class="notch"></div><div class="screen"><iframe title="Fan widget" data-user="stage-phone-2"></iframe></div></div>
-        <figcaption><b class="lname"></b><span class="langs"></span></figcaption>
+        <div class="device"><div class="screen"><iframe title="Fan widget" data-user="stage-phone-2"></iframe></div></div>
+        <figcaption><span>Phone</span><span class="lang lname"></span><span class="langs"></span></figcaption>
       </figure>
     </div>
   </section>

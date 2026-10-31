@@ -1,20 +1,18 @@
-/* Matchday OS shared tokens: broadcast navy, floodlight amber, chalk. */
-@import url("https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@500;700;800;900&family=Hanken+Grotesk:wght@400;500;600;700&family=Noto+Kufi+Arabic:wght@400;600;800&display=swap");
+/* Matchday OS shared tokens: neutral charcoal so the widget sits inside any match-centre page. */
+@import url("https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,600..900&family=Noto+Sans+Arabic:wght@400;500;600;700;800&display=swap");
 
 :root {
-  --navy-950: #071226;
-  --navy-900: #0A1A33;
-  --navy-800: #11244A;
-  --navy-700: #1A3360;
-  --navy-600: #284878;
-  --chalk: #F2F5FA;
-  --mist: #8C9BB5;
-  --floodlight: #F5B425;
-  --live: #FF4D5E;
-  --grass: #1F7A4D;
-  --arg: #75AADB;
-  --fra: #3B5BB5;
-  --font-display: "Big Shoulders Display", "Arial Narrow", sans-serif;
-  --font-body: "Hanken Grotesk", system-ui, sans-serif;
-  --font-ar: "Noto Kufi Arabic", "Hanken Grotesk", system-ui, sans-serif;
+  --page: #242322;
+  --card: #1a1919;
+  --raise: #2c2b2a;
+  --line: #343231;
+  --text: #f4f3f1;
+  --muted: #a6a3a0;
+  --dim: #6f6c69;
+  --accent: #c1d991;
+  --on-accent: #14170f;
+  --live: #e0484f;
+  --font: -apple-system, "SF Pro Text", system-ui, "Segoe UI", Roboto, sans-serif;
+  --font-title: "Archivo", -apple-system, system-ui, sans-serif;
+  --font-ar: "Noto Sans Arabic", -apple-system, system-ui, "Segoe UI", sans-serif;
 }

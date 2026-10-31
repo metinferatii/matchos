@@ -28,7 +28,7 @@
       live: "Live", feedSub: "AI commentary", predict: "Who scores next?", hint: "Tap a player to make your call.",
       votes: function (n) { return n === 1 ? "1 vote" : n + " votes"; }, noVotes: "No calls yet",
       ask: "Ask", askPh: "Ask anything about this match", youAsked: "You asked", answer: "Answer for you",
-      thinking: "Thinking…", goal: "GOAL", update: "Update",
+      thinking: "Thinking…", goal: "Goal", update: "Update",
       flash: "Flash offer", endsIn: "Ends in", buy: "Buy now", buying: "Ordering…", later: "Not now",
       ordered: "Order received. Confirmation is on its way.", expired: "This offer has ended.",
       off: "Subbed off", pens: "Penalties", pensMin: "Pens", pre: "Pre-match",
@@ -40,7 +40,7 @@
       live: "Live", feedSub: "Komente nga AI", predict: "Kush shënon tjetër?", hint: "Zgjidh një lojtar për parashikimin tënd.",
       votes: function (n) { return n === 1 ? "1 votë" : n + " vota"; }, noVotes: "Ende pa vota",
       ask: "Pyet", askPh: "Pyet çfarëdo për këtë ndeshje", youAsked: "Ti pyete", answer: "Përgjigje për ty",
-      thinking: "Duke menduar…", goal: "GOL", update: "Njoftim",
+      thinking: "Duke menduar…", goal: "Gol", update: "Njoftim",
       flash: "Ofertë flash", endsIn: "Mbaron për", buy: "Bli tani", buying: "Duke porositur…", later: "Jo tani",
       ordered: "Porosia u mor. Konfirmimi po vjen.", expired: "Kjo ofertë ka përfunduar.",
       off: "Zëvendësuar", pens: "Penalltitë", pensMin: "Pen.", pre: "Para ndeshjes",
@@ -52,7 +52,7 @@
       live: "En vivo", feedSub: "Narración con IA", predict: "¿Quién marca el próximo?", hint: "Toca un jugador para hacer tu pronóstico.",
       votes: function (n) { return n === 1 ? "1 voto" : n + " votos"; }, noVotes: "Aún sin votos",
       ask: "Preguntar", askPh: "Pregunta lo que quieras del partido", youAsked: "Preguntaste", answer: "Respuesta para ti",
-      thinking: "Pensando…", goal: "GOL", update: "Aviso",
+      thinking: "Pensando…", goal: "Gol", update: "Aviso",
       flash: "Oferta flash", endsIn: "Termina en", buy: "Comprar", buying: "Pidiendo…", later: "Ahora no",
       ordered: "Pedido recibido. La confirmación va en camino.", expired: "Esta oferta ha terminado.",
       off: "Sustituido", pens: "Penales", pensMin: "Pen.", pre: "Previa",
@@ -93,7 +93,19 @@
   if (fill) root.classList.add("fill");
   if (P.get("theme") === "light") root.classList.add("light");
   var accent = P.get("accent");
-  if (accent && /^#?[0-9a-f]{3,8}$/i.test(accent)) root.style.setProperty("--accent", accent[0] === "#" ? accent : "#" + accent);
+  if (accent && /^#?[0-9a-f]{3,8}$/i.test(accent)) {
+    accent = accent[0] === "#" ? accent : "#" + accent;
+    root.style.setProperty("--accent", accent);
+    root.style.setProperty("--on-accent", inkFor(accent));
+  }
+  // dark or light text on the host's accent, whichever reads better
+  function inkFor(hex) {
+    var h = hex.slice(1);
+    if (h.length < 6) h = h.split("").map(function (c) { return c + c; }).join("");
+    var r = parseInt(h.slice(0, 2), 16) / 255, g = parseInt(h.slice(2, 4), 16) / 255, b = parseInt(h.slice(4, 6), 16) / 255;
+    var L = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+    return L > 0.5 ? "#141414" : "#ffffff";
+  }
 
   $("feedTitle").textContent = T.live;
   $("feedSub").textContent = T.feedSub;
@@ -109,6 +121,8 @@
   $("poweredBy").innerHTML = esc(T.powered) + " <b>Matchday OS</b>";
   $("gwWord").textContent = T.goal;
 
+  // server system lines can carry emoji; the UI stays text-only
+  function plain(t) { return String(t).replace(/\p{Extended_Pictographic}\uFE0F?/gu, "").replace(/^\s+/, ""); }
   function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
 
   // ---------- Flags & jersey ----------
@@ -129,8 +143,8 @@
       '<defs><clipPath id="jc"><path d="' + shirt + '"/></clipPath></defs>' +
       '<path d="' + shirt + '" fill="' + body + '"/>' + stripes +
       '<path d="M52 4 Q64 14 76 4" fill="none" stroke="' + (arg ? "#1B2C5C" : "#EF4135") + '" stroke-width="3"/>' +
-      '<text x="64" y="50" text-anchor="middle" font-family="Big Shoulders Display, Arial Narrow, sans-serif" font-weight="800" font-size="13" fill="' + ink + '" letter-spacing="1">' + esc(name) + '</text>' +
-      '<text x="64" y="104" text-anchor="middle" font-family="Big Shoulders Display, Arial Narrow, sans-serif" font-weight="900" font-size="54" fill="' + ink + '">' + esc(num) + '</text>' +
+      '<text x="64" y="50" text-anchor="middle" font-family="-apple-system, system-ui, sans-serif" font-weight="700" font-size="11" fill="' + ink + '" letter-spacing="1">' + esc(name) + '</text>' +
+      '<text x="64" y="104" text-anchor="middle" font-family="-apple-system, system-ui, sans-serif" font-weight="700" font-size="48" fill="' + ink + '">' + esc(num) + '</text>' +
       '</svg>';
   }
 
@@ -138,6 +152,7 @@
   var MATCH = null;           // match.json
   var teamOf = {};            // player -> team
   var goalAt = {};            // clock -> [{player, team, score}]
+  var eventsAt = {};          // clock -> [event types]
   var cursor = 0;             // from /api/state
   var shootout = null;
   var subbedOff = {};
@@ -147,6 +162,7 @@
     m.events.forEach(function (e) {
       if (e.player && e.team && !teamOf[e.player]) teamOf[e.player] = e.team;
       if (e.type === "goal") (goalAt[e.clock] = goalAt[e.clock] || []).push(e);
+      (eventsAt[e.clock] = eventsAt[e.clock] || []).push(e.type);
       if (e.type === "substitution" && e.detail) {
         var inP = e.detail.split(" replaces ")[0];
         if (inP && !teamOf[inP]) teamOf[inP] = e.team;
@@ -181,7 +197,7 @@
         shootout = s.shootout || null;
         if (shootout && S.minute === "PENS" && shootout.home + shootout.away > prevPens && prevPens > 0) {
           // keep it subtle in the shootout: pulse the pens score
-          var el = $("pens"); el.classList.remove("pulse"); void el.offsetWidth; el.classList.add("pulse");
+          var el = $("pens"); el.classList.add("pulse"); setTimeout(function () { el.classList.remove("pulse"); }, 2500);
         }
         computeSubs(); renderScore(); renderPredict();
       }).catch(function () {}).then(function () { metaBusy = false; });
@@ -280,6 +296,7 @@
     $("liveDot").classList.toggle("on", !!live);
     var showPens = S.minute === "PENS" && shootout;
     $("pens").hidden = !showPens;
+    $("minute").hidden = !!showPens;
     if (showPens) { $("pensHome").textContent = shootout.home; $("pensAway").textContent = shootout.away; }
   }
   var wipeTimer = null;
@@ -296,7 +313,7 @@
     var n = $(side === "home" ? "homeScore" : "awayScore");
     n.classList.remove("bump"); void n.offsetWidth; n.classList.add("bump");
     clearTimeout(wipeTimer);
-    wipeTimer = setTimeout(function () { bug.classList.remove("goal"); n.classList.remove("bump"); }, 3400);
+    wipeTimer = setTimeout(function () { bug.classList.remove("goal"); n.classList.remove("bump"); }, 6000);
   }
 
   // ---------- Feed ----------
@@ -325,6 +342,48 @@
     });
     return out;
   }
+  // Small monochrome icons for the timeline column
+  var IC = {
+    goal: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="8" cy="8" r="6.3"/><path d="M8 5.2l2.6 1.9-1 3H6.4l-1-3z" fill="currentColor" stroke="none"/><path d="M8 5.2V1.8M10.6 7.1l3.2-1M9.6 10.1l2 2.7M6.4 10.1l-2 2.7M5.4 7.1l-3.2-1"/></svg>',
+    yellow: '<svg viewBox="0 0 16 16"><rect x="4" y="2" width="8" height="12" rx="1.2" fill="#d9b63a"/></svg>',
+    red: '<svg viewBox="0 0 16 16"><rect x="4" y="2" width="8" height="12" rx="1.2" fill="#e0484f"/></svg>',
+    sub: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5h9M9.5 2.5 12 5 9.5 7.5M13 11H4M6.5 8.5 4 11l2.5 2.5"/></svg>',
+    whistle: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="8" cy="9" r="5.5"/><path d="M8 9V6.2M6.5 1.8h3"/></svg>',
+    shot: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="8" cy="8" r="6"/><circle cx="8" cy="8" r="2.4"/></svg>',
+    pen: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"><path d="M2 12V4h12v8"/><circle cx="8" cy="12.2" r="1.3" fill="currentColor" stroke="none"/></svg>',
+    answer: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"><path d="M2.5 3h11v7.5H7L4 13v-2.5H2.5z"/></svg>',
+    note: '<svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="2" fill="currentColor"/></svg>'
+  };
+  var TYPE_IC = {
+    goal: "goal", yellow_card: "yellow", red_card: "red", substitution: "sub",
+    kickoff: "whistle", half_end: "whistle", full_time: "whistle", shootout_start: "whistle",
+    shot_saved: "shot", shot_missed: "shot", penalty_awarded: "pen", shootout_goal: "pen", shootout_miss: "pen"
+  };
+  // When one clock has several events, pick the one the commentary line talks about.
+  var KW = [
+    [/\b(card|booked|booking)\b|tarjeta|amonest|karton|kartë|بطاقة|إنذار/i, ["red_card", "yellow_card"]],
+    [/\b(replaces?|brings on|change|subs?|substitut\w*)\b|⇄|cambio|sustitu|zëvendës|ndërrim|تبديل/i, ["substitution"]],
+    [/\b(miss\w*|saved?|saves|wide|over)\b|falla|ataja|fuera|humb|gabon|prit|يضيع|يتصدى|أهدر/i, ["shootout_miss", "shot_saved", "shot_missed"]],
+    [/\b(clinch\w*|wins?|won|champions|full time|ends?)\b|campe|gana|fitoj|kampion|يتوج|تفوز|نهاية/i, ["full_time", "half_end"]],
+    [/penalt|penal|shootout|tanda|ترجيح|جزاء/i, ["shootout_goal", "penalty_awarded", "shootout_start"]],
+    [/\b(whistle|kick-?off|half-?time|under way)\b|silbat|descanso|pitido|fishkëll|pushim|صافرة|استراحة|انطلق/i, ["kickoff", "half_end", "full_time"]]
+  ];
+  function iconFor(it, list) {
+    if (it.kind === "answer" || it.kind === "question" || it.kind === "pending") return IC.answer;
+    if (it.kind === "system") return IC.note;
+    if (isGoalItem(it, list)) return IC.goal;
+    var types = (eventsAt[it.minute] || []).filter(function (t) { return t !== "goal"; });
+    if (!types.length) return IC.note;
+    var t = types[0];
+    if (types.length > 1) {
+      outer: for (var i = 0; i < KW.length; i++) {
+        if (!KW[i][0].test(it.text)) continue;
+        for (var k = 0; k < KW[i][1].length; k++) if (types.indexOf(KW[i][1][k]) >= 0) { t = KW[i][1][k]; break outer; }
+      }
+    }
+    return IC[TYPE_IC[t]] || IC.note;
+  }
+
   function renderFeed() {
     var list = merged();
     var feed = $("feed");
@@ -352,7 +411,7 @@
       } else if (it.minute === "PENS") cls += " pens-item";
       if (isNew) cls += " new";
       var minute = it.kind === "question" || it.kind === "pending" ? "" : '<span class="min">' + esc(displayMinute(it.minute)) + "</span>";
-      html.push('<li class="' + cls + '"' + style + ">" + minute + '<div class="txt">' + (lbl ? '<span class="lbl">' + esc(lbl) + "</span>" : "") + esc(it.text) + "</div></li>");
+      html.push('<li class="' + cls + '"' + style + ">" + minute + '<span class="ic" aria-hidden="true">' + iconFor(it, list) + "</span>" + '<div class="txt">' + (lbl ? '<span class="lbl">' + esc(lbl) + "</span>" : "") + esc(it.kind === "system" ? plain(it.text) : it.text) + "</div></li>");
     }
     var keepTop = feed.scrollTop < 8;
     feed.innerHTML = html.join("");
@@ -472,7 +531,7 @@
     var s = Math.ceil(left / 1000);
     var mmss = Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0");
     $("countdown").textContent = mmss;
-    $("miniCount").textContent = "⏱ " + mmss;
+    $("miniCount").textContent = mmss;
     var span = Math.max(1, o.expiresAt - o.__start);
     $("timebar").style.transform = "scaleX(" + Math.min(1, left / span) + ")";
     if (left <= 0 && buy.state !== "done") {
@@ -497,7 +556,7 @@
     $("confirm").hidden = true;
   }
   function showConfirm(text) {
-    $("confirm").textContent = text;
+    $("confirm").textContent = plain(text);
     $("confirm").hidden = false;
   }
   function buyDone(text) {

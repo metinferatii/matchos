@@ -7,64 +7,50 @@
 <link rel="stylesheet" href="tokens.css">
 <style>
   * { box-sizing: border-box; }
-  body { margin: 0; min-height: 100vh; background: var(--navy-950); color: var(--chalk); font-family: var(--font-body); -webkit-font-smoothing: antialiased; }
-  .wrap { max-width: 1040px; margin: 0 auto; padding: 56px 24px 40px; }
-  .mark { display: flex; align-items: center; gap: 12px; }
-  .mark svg { width: 40px; height: 40px; }
-  .mark b { font-family: var(--font-display); font-weight: 800; font-size: 28px; }
-  h1 { font-family: var(--font-display); font-weight: 900; font-size: clamp(44px, 7vw, 84px); line-height: .92; margin: 40px 0 16px; max-width: 15ch; letter-spacing: .005em; }
-  .sub { font-size: 19px; line-height: 1.5; color: #B9C6DC; max-width: 58ch; margin: 0; }
-  .snippet { margin: 36px 0 12px; background: var(--navy-900); border: 1px solid rgba(160,185,230,.16); border-radius: 14px; padding: 18px 20px; display: flex; align-items: center; gap: 16px; }
-  code { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 15px; color: #E3EAF6; flex: 1; overflow-x: auto; white-space: nowrap; }
-  code .a { color: var(--floodlight); } code .s { color: #8FD3A8; } code .t { color: #7FB2FF; }
-  .copy { background: var(--floodlight); color: #1A1300; border: 0; border-radius: 9px; padding: 9px 14px; font-weight: 700; font-size: 14px; cursor: pointer; font-family: inherit; }
-  .note { font-size: 14px; color: var(--mist); margin: 0 0 44px; }
-  .pages { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; }
-  .pages a { display: block; background: var(--navy-900); border: 1px solid rgba(160,185,230,.12); border-radius: 14px; padding: 18px 18px 20px; color: inherit; text-decoration: none; }
-  .pages a:hover { border-color: var(--floodlight); }
-  .pages b { display: block; font-family: var(--font-display); font-weight: 800; font-size: 24px; margin-bottom: 6px; }
-  .pages span { font-size: 14px; color: #B9C6DC; line-height: 1.45; }
-  .langs { display: flex; gap: 6px; margin-top: 10px; }
-  .langs a { padding: 3px 9px; border-radius: 6px; font-size: 13px; font-weight: 700; background: rgba(255,255,255,.08); border: 0; display: inline; }
-  footer { margin-top: 48px; font-size: 13px; color: var(--mist); }
+  body { margin: 0; background: var(--page); color: var(--text); font-family: var(--font); font-size: 15px; line-height: 1.5; -webkit-font-smoothing: antialiased; }
+  main { max-width: 760px; margin: 0 auto; padding: 72px 24px 48px; }
+  h1 { margin: 0; font-family: var(--font-title); font-stretch: 118%; font-weight: 800; font-size: 28px; text-transform: uppercase; }
+  p { margin: 8px 0 0; color: var(--muted); max-width: 60ch; }
+  .snippet { margin-top: 32px; display: flex; align-items: center; gap: 12px; background: var(--card); border-radius: 12px; padding: 16px; }
+  code { flex: 1; overflow-x: auto; white-space: nowrap; font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 13px; }
+  .copy { background: var(--text); color: var(--card); border: 0; border-radius: 8px; padding: 8px 14px; font: inherit; font-weight: 700; font-size: 13px; cursor: pointer; }
+  .note { font-size: 13px; }
+  ul { list-style: none; margin: 40px 0 0; padding: 0; }
+  li { display: flex; justify-content: space-between; gap: 16px; padding: 12px 0; border-top: 1px solid var(--line); }
+  li a { color: var(--text); font-weight: 600; }
+  li span { color: var(--muted); }
+  li span a { color: var(--muted); font-weight: 400; margin-inline-start: 8px; }
+  a:hover { color: var(--accent) !important; }
+  footer { margin-top: 48px; font-size: 13px; color: var(--dim); }
 </style>
 </head>
 <body>
-<div class="wrap">
-  <div class="mark">
-    <svg viewBox="0 0 32 32" aria-hidden="true"><rect x="1" y="1" width="30" height="30" rx="8" fill="#F5B425"/><path d="M8 22V10l8 7 8-7v12" fill="none" stroke="#071226" stroke-width="3.2" stroke-linejoin="round" stroke-linecap="round"/></svg>
-    <b>Matchday OS</b>
-  </div>
-  <h1>One script tag. A whole matchday team.</h1>
-  <p class="sub">Live commentary in your fans' own language, next-scorer predictions, answers to their questions and flash offers from the club shop the moment a goal goes in. Run by AI agents, dropped into any club website.</p>
+<main>
+  <h1>Matchday OS</h1>
+  <p>A matchday team for small clubs: live commentary in each fan's language, next-scorer calls, answers to questions and goal-time offers from the club shop. One script tag.</p>
 
-  <div class="snippet">
-    <code id="snip"></code>
-    <button class="copy" id="copy" type="button">Copy</button>
-  </div>
-  <p class="note">Set <b>data-lang</b> to en, sq, es or ar. Optional: <b>data-theme</b> (dark or light) and <b>data-accent</b> for club colours.</p>
+  <div class="snippet"><code id="snip"></code><button class="copy" id="copy" type="button">Copy</button></div>
+  <p class="note">data-lang: en, sq, es or ar. Optional data-theme (dark or light) and data-accent to match the host page.</p>
 
-  <div class="pages">
-    <a href="control.html"><b>Control room</b><span>Agents talking, the live pitch and three fan surfaces on one screen.</span></a>
-    <a href="club.html"><b>Club website</b><span>Kestrel Bay FC, a fictional club, with the embed dropped in.</span></a>
-    <div class="pages-item" style="background:var(--navy-900);border:1px solid rgba(160,185,230,.12);border-radius:14px;padding:18px 18px 20px">
-      <b style="display:block;font-family:var(--font-display);font-weight:800;font-size:24px;margin-bottom:6px">Fan widget</b>
-      <span style="font-size:14px;color:#B9C6DC">Open it on its own, in any language.</span>
-      <div class="langs" id="langs"></div>
-    </div>
-  </div>
+  <ul>
+    <li><a href="control.html">Control room</a><span>Pitch, agents and fan screens</span></li>
+    <li><a href="club.html">Match page</a><span>The embed on a host site</span></li>
+    <li><a href="widget.html?match=wc22-final&amp;lang=en">Widget</a><span id="langs"></span></li>
+  </ul>
   <footer>Replaying Argentina 3–3 France, 2022 World Cup final. Data: StatsBomb Open Data.</footer>
-</div>
+</main>
 <script>
   var src = location.origin + "/embed.js";
-  document.getElementById("snip").innerHTML = '<span class="t">&lt;script</span> <span class="a">src</span>=<span class="s">"' + src + '"</span> <span class="a">data-match</span>=<span class="s">"wc22-final"</span> <span class="a">data-lang</span>=<span class="s">"sq"</span><span class="t">&gt;&lt;/script&gt;</span>';
   var raw = '<script src="' + src + '" data-match="wc22-final" data-lang="sq"><\/script>';
+  document.getElementById("snip").textContent = raw;
   document.getElementById("copy").onclick = function () {
     var b = this;
     (navigator.clipboard ? navigator.clipboard.writeText(raw) : Promise.reject()).then(function () { b.textContent = "Copied"; }, function () { b.textContent = "Select and copy"; });
     setTimeout(function () { b.textContent = "Copy"; }, 1800);
   };
-  document.getElementById("langs").innerHTML = ["en", "sq", "es", "ar"].map(function (l) { return '<a href="widget.html?match=wc22-final&lang=' + l + '">' + l + "</a>"; }).join("");
+  document.getElementById("langs").innerHTML = ["en", "sq", "es", "ar", "en&theme=light"].map(function (l) {
+    return '<a href="widget.html?match=wc22-final&lang=' + l + '">' + (l.indexOf("light") > 0 ? "light" : l) + "</a>";
+  }).join("");
 </script>
 </body>
 </html>

@@ -13,33 +13,55 @@
   }
 
   // ---------- Agents ----------
-  var ICON = {
-    ingest: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v11"/><path d="m7 9 5 5 5-5"/><path d="M4 17v3h16v-3"/></svg>',
-    commentator: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v3"/></svg>',
-    translator: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h9"/><path d="M8.5 3v2"/><path d="M11 5c-1 4-3.5 7-7 9"/><path d="M6.5 9c1 2 3 3.5 5 4.5"/><path d="m13 21 4-9 4 9"/><path d="M14.5 18h5"/></svg>',
-    stats: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M5 20v-6"/><path d="M12 20V5"/><path d="M19 20v-10"/></svg>',
-    merch: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="M3 12V4h8l10 10-8 8z"/><circle cx="7.5" cy="8.5" r="1.6" fill="currentColor"/></svg>',
-    other: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="12" cy="12" r="7"/></svg>'
-  };
+  // One desaturated hue per agent; the accent stays reserved for goals and actions.
   var AGENTS = {
-    ingest: { c: "#5EC8F2", label: "ingest" },
-    commentator: { c: "#F5B425", label: "commentator" },
-    translator: { c: "#B794FF", label: "translator" },
-    stats: { c: "#4FD18B", label: "stats" },
-    merch: { c: "#FF7A8A", label: "merch" }
+    ingest: { c: "#8fb0c0", label: "ingest" },
+    commentator: { c: "#d3bc8f", label: "commentator" },
+    translator: { c: "#ad9fc9", label: "translator" },
+    stats: { c: "#93bb9c", label: "stats" },
+    merch: { c: "#cc9c9c", label: "merch" },
+    producer: { c: "#b4bf91", label: "producer" }
   };
-  function agentOf(name) { return AGENTS[name] || { c: "#8C9BB5", label: name || "agent" }; }
-
-  $("roster").innerHTML = Object.keys(AGENTS).map(function (k) {
-    return '<span class="chip" id="chip-' + k + '" style="--c:' + AGENTS[k].c + '"><span class="av" style="--c:' + AGENTS[k].c + '">' + ICON[k] + "</span>" + k + "</span>";
-  }).join("");
+  var senders = {};
+  function countAgent(name) {
+    if (!name || senders[name]) return;
+    senders[name] = true;
+    $("agentCount").textContent = Math.max(5, Object.keys(senders).length) + " agents";
+  }
+  function agentOf(name) { return AGENTS[name] || { c: "#8f9f93", label: name || "agent" }; }
+  var FLAG_LANG = { "\u{1F1E6}\u{1F1F1}": "sq", "\u{1F1EA}\u{1F1F8}": "es", "\u{1F1F8}\u{1F1E6}": "ar", "\u{1F1EC}\u{1F1E7}": "en" };
+  var PICTO = /[\u{1F1E6}-\u{1F1FF}]|\p{Extended_Pictographic}|\uFE0F|\u200D/gu;
+  function agentText(raw) {
+    var t = String(raw);
+    // translator posts "flag text · flag text ..."; show one line per language with a plain code
+    // newer format: "sq: text · es: text · ar: text"
+    if (/^(sq|es|ar|en):\s/.test(t)) {
+      return t.split(/\s+·\s+(?=(?:sq|es|ar|en):\s)/).map(function (p) {
+        var m = p.match(/^(sq|es|ar|en):\s*/);
+        return '<span class="tr"><span class="lc">' + m[1] + '</span><span dir="auto">' + mention(esc(p.slice(m[0].length).replace(PICTO, "").trim())) + "</span></span>";
+      }).join("");
+    }
+    var parts = t.split(/\s+·\s+(?=[\u{1F1E6}-\u{1F1FF}])/u);
+    if (parts.length > 1 || /^[\u{1F1E6}-\u{1F1FF}]{2}/u.test(t)) {
+      return parts.map(function (p) {
+        var m = p.match(/^([\u{1F1E6}-\u{1F1FF}]{2})\s*/u);
+        var code = m ? (FLAG_LANG[m[1]] || "") : "";
+        var body = (m ? p.slice(m[0].length) : p).replace(PICTO, "").trim();
+        return '<span class="tr"><span class="lc">' + code + '</span><span dir="auto">' + mention(esc(body)) + "</span></span>";
+      }).join("");
+    }
+    return mention(esc(t.replace(PICTO, "").replace(/\s{2,}/g, " ").trim()));
+  }
+  function mention(h) {
+    return h.replace(/(^|\s)@([a-z]+)/g, function (_, sp, n) { return sp + '<span class="mention" style="--c-to:' + agentOf(n).c + '">' + n + "</span>"; });
+  }
 
   var seenMsg = {};
-  var lastFrom = null, lastTs = 0;
+  var lastFrom = null, lastTo = null, lastTs = 0;
   var chat = $("chat");
   function msgKey(m) { return m.from + "|" + m.ts + "|" + m.text; }
   function renderEmpty() {
-    if (!chat.children.length) chat.innerHTML = '<li class="empty">No agent messages yet. When the replay runs, ingest, commentator, translator, stats and merch post here as they hand work to each other.</li>';
+    if (!chat.children.length) chat.innerHTML = '<li class="empty">Quiet before kick-off. Once the replay starts, ingest, commentator, translator, stats and merch hand work to each other here.</li>';
   }
   function addAgentMsg(m, animate) {
     if (!m || !m.text) return;
@@ -49,31 +71,26 @@
     var empty = chat.querySelector(".empty");
     if (empty) empty.remove();
     var a = agentOf(m.from);
-    var cont = m.from === lastFrom && m.ts - lastTs < 15000;
-    lastFrom = m.from; lastTs = m.ts;
+    var toName = m.to ? String(m.to).replace(/^@/, "") : "#match";
+    var cont = m.from === lastFrom && m.to === lastTo && m.ts - lastTs < 15000;
+    lastFrom = m.from; lastTo = m.to; lastTs = m.ts;
     var li = document.createElement("li");
     li.className = "msg" + (cont ? " cont" : "") + (animate ? " new" : "");
     li.style.setProperty("--c", a.c);
     var t = new Date(m.ts || Date.now());
     var time = String(t.getHours()).padStart(2, "0") + ":" + String(t.getMinutes()).padStart(2, "0") + ":" + String(t.getSeconds()).padStart(2, "0");
-    var to = m.to && m.to !== "#match" ? '<span class="to">to ' + esc(m.to) + "</span>" : "";
-    var text = esc(m.text).replace(/(^|\s)(@[a-z]+)/g, '$1<span class="mention">$2</span>');
-    li.innerHTML = '<span class="av">' + (ICON[m.from] || ICON.other) + "</span><div>" +
-      (cont ? "" : '<div class="mhead"><b>' + esc(a.label) + "</b>" + to + "<time>" + time + "</time></div>") +
-      '<div class="mtext">' + text + "</div></div>";
+    countAgent(m.from);
+    var toAgent = AGENTS[toName] || AGENTS[toName.replace(/s$/, "")];
+    var to = '<span class="arrow">→</span><span class="to"' + (toAgent ? ' style="color:' + toAgent.c + '"' : "") + ">" + esc(toName) + "</span>";
+    li.innerHTML = (cont ? "" : '<div class="mhead"><b>' + esc(a.label) + "</b>" + to + "<time>" + time + "</time></div>") +
+      '<div class="mtext">' + agentText(m.text) + "</div>";
+    var nearBottom = chat.scrollHeight - chat.scrollTop - chat.clientHeight < 220;
     chat.appendChild(li);
     while (chat.children.length > 250) chat.removeChild(chat.firstChild);
-    var nearBottom = chat.scrollHeight - chat.scrollTop - chat.clientHeight < 220;
     if (nearBottom || !animate) chat.scrollTop = chat.scrollHeight;
-    var chip = $("chip-" + m.from);
-    if (chip && animate) {
-      chip.classList.add("active");
-      clearTimeout(chip._t);
-      chip._t = setTimeout(function () { chip.classList.remove("active"); }, 2500);
-    }
   }
   function resetAgents(log) {
-    chat.innerHTML = ""; seenMsg = {}; lastFrom = null;
+    chat.innerHTML = ""; seenMsg = {}; lastFrom = null; lastTo = null;
     (log || []).forEach(function (m) { addAgentMsg(m, false); });
     renderEmpty();
   }
@@ -84,7 +101,7 @@
   var TYPE_LABEL = {
     kickoff: "Kick-off", half_end: "Whistle", goal: "Goal", shot_saved: "Shot saved", shot_missed: "Shot off target",
     penalty_awarded: "Penalty awarded", yellow_card: "Yellow card", red_card: "Red card", substitution: "Substitution",
-    shootout_start: "Penalty shootout", shootout_goal: "Shootout: scored", shootout_miss: "Shootout: missed", full_time: "Full time"
+    shootout_start: "Penalty shootout", shootout_goal: "Penalty scored", shootout_miss: "Penalty missed", full_time: "Full time"
   };
 
   function pitchPoint(e) {
@@ -100,7 +117,7 @@
   }
 
   // ---------- Pitch ----------
-  var ball = $("ballGroup"), trail = $("trail"), halo = $("halo");
+  var ball = $("ballGroup"), trail = $("trail");
   var ballPos = [60, 40];
   var animToken = 0;
   function moveBall(p, instant, cls) {
@@ -117,7 +134,7 @@
     if (e.type === "goal") return '<circle class="mk-goal' + cls + '" cx="' + p[0] + '" cy="' + p[1] + '" r="1.6"/>';
     if (e.type === "shot_saved") return '<circle class="mk-saved' + cls + '" cx="' + p[0] + '" cy="' + p[1] + '" r="1.1"/>';
     if (e.type === "shot_missed") return '<circle class="mk-shot' + cls + '" cx="' + p[0] + '" cy="' + p[1] + '" r="1.1"/>';
-    if (e.type === "yellow_card" || e.type === "red_card") return '<rect class="mk-card' + cls + '" x="' + (p[0] - .7) + '" y="' + (p[1] - 1) + '" width="1.4" height="2" fill="' + (e.type === "red_card" ? "#FF4D5E" : "#FFD43B") + '"/>';
+    if (e.type === "yellow_card" || e.type === "red_card") return '<rect class="mk-card' + cls + '" x="' + (p[0] - .6) + '" y="' + (p[1] - .9) + '" width="1.2" height="1.8" fill="' + (e.type === "red_card" ? "#ce4d53" : "#d9c36a") + '"/>';
     return "";
   }
   function rebuildMarkers(upto) {
@@ -149,37 +166,46 @@
         moveBall([right ? 121.2 : -1.2, 38 + (p[1] - 40) * 0.08], false, "into");
       }, 750);
     }
-    halo.setAttribute("opacity", isGoal ? 1 : 0);
     if (e.type === "goal") goalFlash(e);
     showCaption(e, idx);
   }
 
-  function goalFlash(e) {
-    var f = $("goalFlash");
-    $("gfWho").textContent = e.player + " · " + e.team + "  " + e.score.home + "–" + e.score.away;
-    f.classList.remove("on"); void f.offsetWidth; f.classList.add("on");
-    var ts = document.querySelector(".tscore");
-    ts.classList.remove("flash"); void ts.offsetWidth; ts.classList.add("flash");
+  var flashT = null;
+  function goalFlash() {
+    var ts = $("tScore");
+    ts.classList.add("flash");
+    clearTimeout(flashT);
+    flashT = setTimeout(function () { ts.classList.remove("flash"); }, 4000);
   }
 
   function showCaption(e, idx) {
     var card = $("eventCard");
     card.classList.toggle("is-goal", !!e && (e.type === "goal" || e.type === "shootout_goal"));
-    card.classList.toggle("is-card", !!e && /card/.test(e.type));
+    renderRecent(idx);
     if (!e) {
       $("evMin").textContent = "0'";
       $("evType").textContent = "Waiting for kick-off";
       $("evWho").innerHTML = "";
-      $("evDetail").textContent = "Press Start, or Space, to begin the replay.";
+      $("evDetail").textContent = "Press Space to start the replay.";
       return;
     }
     $("evMin").textContent = e.clock === "PENS" ? "Pens" : e.clock;
-    $("evType").textContent = TYPE_LABEL[e.type] || e.type;
-    $("evWho").innerHTML = e.player ? '<span class="tflag">' + flagSvg(e.team) + "</span>" + esc(e.player) + ' <span style="color:var(--mist);font-weight:500">' + esc(e.team || "") + "</span>" : "";
+    var label = TYPE_LABEL[e.type] || e.type;
+    if (e.type === "goal") label += ", " + e.score.home + "–" + e.score.away;
+    $("evType").textContent = label;
+    $("evWho").innerHTML = e.player ? esc(e.player) + ' <span class="team">' + esc(e.team || "") + "</span>" : "";
     var detail = e.detail;
-    if (e.shootout && e.period === 5) detail += " · shootout " + e.shootout.home + "–" + e.shootout.away;
+    if (e.shootout && e.period === 5) detail += ", shootout " + e.shootout.home + "–" + e.shootout.away;
     $("evDetail").textContent = detail;
-    ["evMin", "evType", "evWho", "evDetail"].forEach(function (id) { var el = $(id); el.classList.remove("swap"); void el.offsetWidth; el.classList.add("swap"); });
+  }
+  function renderRecent(idx) {
+    var out = [];
+    for (var i = idx - 1; i >= 0 && out.length < 12; i--) {
+      var e = EVENTS[i];
+      var what = (TYPE_LABEL[e.type] || e.type) + (e.player ? ", " + e.player : "");
+      out.push('<li class="' + (e.type === "goal" ? "goal" : "") + '"><span class="m">' + esc(e.clock === "PENS" ? "Pens" : e.clock) + "</span><span>" + esc(what) + "</span></li>");
+    }
+    $("recent").innerHTML = out.join("");
   }
 
   // ---------- Timeline ----------
@@ -216,27 +242,15 @@
     st = s;
     $("tHs").textContent = s.score.home;
     $("tAs").textContent = s.score.away;
-    $("tMin").textContent = s.clock === "0'" ? "Pre-match" : s.clock === "PENS" ? "Pens" : s.clock;
+    $("tMin").textContent = s.clock === "0'" ? "Pre-match" : s.clock === "PENS" ? "Penalties" : s.clock;
     var pens = s.clock === "PENS" && s.shootout;
     $("tPens").hidden = !pens;
-    if (pens) $("tPens").textContent = "Pens " + s.shootout.home + "–" + s.shootout.away;
+    if (pens) $("tPens").textContent = s.shootout.home + "–" + s.shootout.away;
+    $("liveDot").classList.toggle("on", !!s.running);
     var play = $("btnPlay");
     play.textContent = s.running ? "Pause" : (s.cursor >= s.total ? "Finished" : "Start");
     play.classList.toggle("running", !!s.running);
     document.querySelectorAll("#speed button").forEach(function (b) { b.classList.toggle("on", +b.dataset.ms === s.tickMs); });
-    $("stEvent").textContent = s.cursor + " / " + s.total;
-    var votes = 0; (s.predictions || []).forEach(function (p) { votes += p.votes; });
-    $("stVotes").textContent = votes;
-    $("stOrders").textContent = s.orders || 0;
-    var o = s.offer, offerEl = $("stOffer");
-    if (o && o.expiresAt > Date.now()) {
-      var left = Math.ceil((o.expiresAt - Date.now()) / 1000);
-      offerEl.innerHTML = "<b>" + esc(o.player) + " −" + o.discountPct + "% · " + Math.floor(left / 60) + ":" + String(left % 60).padStart(2, "0") + "</b><span>flash offer live</span>";
-      offerEl.classList.add("live");
-    } else {
-      offerEl.innerHTML = "<b>No offer live</b><span>merch agent</span>";
-      offerEl.classList.remove("live");
-    }
 
     if (!EVENTS.length) return;
     var cur = s.cursor;
@@ -247,7 +261,6 @@
         rebuildMarkers(cur);
         moveBall(lastPointBefore(cur), true);
         trail.style.opacity = 0;
-        halo.setAttribute("opacity", 0);
         showCaption(EVENTS[cur - 1] || null, cur - 1);
         if (cur < shownCursor || cur === 0) resetAgentsFromState(s);
       } else {
@@ -290,10 +303,7 @@
 
   fetch(API + "/match.json").then(function (r) { return r.json(); }).then(function (m) {
     MATCH = m; EVENTS = m.events;
-    $("matchName").textContent = m.competition + " · " + m.venue;
-    $("tHome").textContent = m.home.short; $("tAway").textContent = m.away.short;
-    $("tHomeFlag").innerHTML = flagSvg(m.home.name); $("tAwayFlag").innerHTML = flagSvg(m.away.name);
-    $("dirHome").innerHTML = flagSvg(m.home.name); $("dirAway").innerHTML = flagSvg(m.away.name);
+    $("tHome").textContent = m.home.name; $("tAway").textContent = m.away.name;
     $("dirHomeName").textContent = m.home.name; $("dirAwayName").textContent = m.away.name;
     buildTimeline();
     // seed agents from the log on first load
@@ -373,23 +383,24 @@
     iframe.style.height = Math.ceil(h / scale) + "px";
     iframe.style.transform = "scale(" + scale + ")";
   }
-  // phones take their width from the row height (390x800-ish screens)
-  var surfaces = document.querySelector(".surfaces");
+  // phones take their size from the row height, capped by the column width
+  var phones = document.querySelector(".phones");
   new ResizeObserver(function () {
-    var h = surfaces.clientHeight - 34; // minus caption
-    surfaces.style.setProperty("--phone-w", Math.round(Math.max(200, h * 0.5)) + "px");
-  }).observe(surfaces);
+    var h = phones.clientHeight - 30; // minus caption
+    var w = Math.min(h * 0.5, (phones.clientWidth - 24) / 2);
+    phones.style.setProperty("--phone-w", Math.round(Math.max(160, w)) + "px");
+  }).observe(phones);
 
   var club = $("clubFrame");
   // land the club site on its live match centre so the embed is in view
   club.addEventListener("load", function () {
     try {
       var doc = club.contentDocument;
-      var target = doc.querySelector("main");
-      if (target) club.contentWindow.scrollTo(0, target.getBoundingClientRect().top + club.contentWindow.scrollY - 16);
+      var target = doc.querySelector(".body");
+      if (target) club.contentWindow.scrollTo(0, target.getBoundingClientRect().top + club.contentWindow.scrollY + 16);
     } catch (e) {}
   });
-  new ResizeObserver(function () { fitFrame($("clubScreen"), club, 1280); }).observe($("clubScreen"));
+  new ResizeObserver(function () { fitFrame($("clubScreen"), club, 1100); }).observe($("clubScreen"));
 
   document.querySelectorAll(".surface.phone").forEach(function (fig) {
     var screen = fig.querySelector(".screen");
@@ -397,7 +408,7 @@
     function setLang(lang) {
       fig.dataset.lang = lang;
       iframe.src = "widget.html?" + new URLSearchParams({ match: MATCH_ID, lang: lang, userId: iframe.dataset.user + "-" + lang, fill: "1" });
-      fig.querySelector(".lname").textContent = LANG_NAME[lang] + " fan";
+      fig.querySelector(".lname").textContent = LANG_NAME[lang];
       fig.querySelectorAll(".langs button").forEach(function (b) { b.classList.toggle("on", b.dataset.lang === lang); });
     }
     fig.querySelector(".langs").innerHTML = ["sq", "es", "ar", "en"].map(function (l) { return '<button type="button" data-lang="' + l + '">' + l + "</button>"; }).join("");

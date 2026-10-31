@@ -1,6 +1,6 @@
 /*! Matchday OS embed. Usage:
  *  <script src="https://HOST/embed.js" data-match="wc22-final" data-lang="en"
- *          data-theme="dark|light" data-accent="#F5B425"></script>
+ *          data-theme="dark|light" data-accent="#c1d991"></script>
  */
 (function () {
   var script = document.currentScript || (function () {
@@ -42,7 +42,7 @@
   iframe.setAttribute("loading", "eager");
   iframe.setAttribute("allow", "clipboard-write");
   iframe.style.cssText = "display:block;width:100%;max-width:" + (d.maxWidth || "720px") +
-    ";height:560px;border:0;border-radius:16px;background:transparent;color-scheme:normal;overflow:hidden;transition:height .2s ease";
+    ";height:560px;border:0;border-radius:12px;background:transparent;color-scheme:normal;overflow:hidden;transition:height .2s ease";
   script.parentNode.insertBefore(iframe, script.nextSibling);
 
   window.addEventListener("message", function (e) {
