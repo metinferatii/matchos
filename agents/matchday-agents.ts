@@ -14,17 +14,18 @@ import { templateLine } from "../shared/templates"
 import { EVENTS, MATCH_ID, MODEL, Member, RUN, STEP_MS, budget, describe, flags, goalsBy, isGoal, llm, room, supabase, tick } from "./core"
 import { actors } from "./generated/index.js"
 import { LANG_NAME, releaseHires, restoreHires, startHiring } from "./hiring"
+import { startInitiative } from "./initiative"
 import { JERSEY, loadInventory, negotiateOffer, recordSale, reseedInventory, startClubOps } from "./negotiation"
 import { ruleDirective, startProducer, type Directive } from "./producer"
 
-const names = ["ingest", "commentator", "translator", "stats", "merch", ...(flags.producer ? ["producer"] : []), ...(flags.negotiation ? ["club-ops"] : [])]
+const names = ["ingest", "commentator", "translator", "stats", "merch", ...(flags.producer ? ["producer"] : []), ...(flags.negotiation ? ["club-ops"] : []), ...(flags.initiative ? ["crowd"] : [])]
 const members = Object.fromEntries(await Promise.all(names.map(async n => [n, await Member.join(n)] as const)))
 const { ingest, commentator, translator, stats, merch } = members
 console.log(`Newsroom online for ${MATCH_ID} (run ${RUN}, model ${MODEL}) flags ${JSON.stringify(flags)}`)
 
 const ROLES: Record<string, string> = {
     ingest: "match data", producer: "editor", commentator: "commentary", translator: "translator (sq, es, ar)",
-    stats: "facts and answers", merch: "flash offers", "club-ops": "stock and pricing rules",
+    stats: "facts and answers", merch: "flash offers", "club-ops": "stock and pricing rules", crowd: "fan mood",
 }
 await room.registerAgents(names.map(n => ({ name: n, role: ROLES[n] ?? n })))
 
@@ -180,6 +181,8 @@ stats.on(async m => {
     await room.postAnswer(q.userId, q.lang as Lang, answer)
     await stats.post("all", `Answered (${q.lang}): ${answer}`)
 })
+
+if (flags.initiative) startInitiative({ stats, producer: members.producer, crowd: members.crowd })
 
 // ---- ingest: the bridge from the MatchRoom actor onto the relay ----
 

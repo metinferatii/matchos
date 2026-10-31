@@ -23,6 +23,8 @@ interface $MatchRoomContract {
         roster: RosterEntry[]
         extraFeed: Record<string, FeedItem[]>
         inventory: Record<string, InventoryItem>
+        questions: Question[]
+        voteLang: Record<string, FanLang>
     }
     Methods: {
         confirmOrder(orderId: string, paidEur: number): Promise<void>
@@ -36,6 +38,17 @@ interface $MatchRoomContract {
             rearmed: boolean
             alarm: number | null
         }>
+        /** Per language: connected fans, recent questions and current votes. */
+        getCrowd(windowMs?: number): Promise<
+            Record<
+                string,
+                {
+                    fans: number
+                    questions: string[]
+                    votes: Record<string, number>
+                }
+            >
+        >
         getInventory(): Promise<Record<string, InventoryItem>>
         getOrders(): Promise<Order[]>
         getRoster(): Promise<RosterEntry[]>
@@ -51,6 +64,10 @@ interface $MatchRoomContract {
         postCommentary(eventId: number, lines: LangLines): Promise<void>
         /** Commentary from a hired translator. `eventId` null is a backfill of the latest line. */
         postExtraCommentary(eventId: number | null, lang: FanLang, text: string): Promise<void>
+        /** A short explainer for every fan of one language (feed kind "answer"). */
+        postLangAnswer(lang: FanLang, text: string): Promise<void>
+        /** A stats nugget for everyone: one line per covered language (English for the rest). */
+        postNugget(lines: Record<string, string>): Promise<void>
         /** The agents process registers its base team on start; hired agents already on the roster stay. */
         registerAgents(
             team: {

@@ -63,6 +63,10 @@ export declare namespace actors {
                 Args: Parameters<Stub["ensureTicking"]>
                 Result: Awaited<ReturnType<Stub["ensureTicking"]>>
             }
+            ["getCrowd"]: {
+                Args: Parameters<Stub["getCrowd"]>
+                Result: Awaited<ReturnType<Stub["getCrowd"]>>
+            }
             ["getInventory"]: {
                 Args: Parameters<Stub["getInventory"]>
                 Result: Awaited<ReturnType<Stub["getInventory"]>>
@@ -110,6 +114,14 @@ export declare namespace actors {
             ["postExtraCommentary"]: {
                 Args: Parameters<Stub["postExtraCommentary"]>
                 Result: Awaited<ReturnType<Stub["postExtraCommentary"]>>
+            }
+            ["postLangAnswer"]: {
+                Args: Parameters<Stub["postLangAnswer"]>
+                Result: Awaited<ReturnType<Stub["postLangAnswer"]>>
+            }
+            ["postNugget"]: {
+                Args: Parameters<Stub["postNugget"]>
+                Result: Awaited<ReturnType<Stub["postNugget"]>>
             }
             ["registerAgents"]: {
                 Args: Parameters<Stub["registerAgents"]>
@@ -160,6 +172,10 @@ export declare namespace actors {
                 type Args = $MethodTypes["ensureTicking"]["Args"]
                 type Result = $MethodTypes["ensureTicking"]["Result"]
             }
+            namespace getCrowd {
+                type Args = $MethodTypes["getCrowd"]["Args"]
+                type Result = $MethodTypes["getCrowd"]["Result"]
+            }
             namespace getInventory {
                 type Args = $MethodTypes["getInventory"]["Args"]
                 type Result = $MethodTypes["getInventory"]["Result"]
@@ -207,6 +223,14 @@ export declare namespace actors {
             namespace postExtraCommentary {
                 type Args = $MethodTypes["postExtraCommentary"]["Args"]
                 type Result = $MethodTypes["postExtraCommentary"]["Result"]
+            }
+            namespace postLangAnswer {
+                type Args = $MethodTypes["postLangAnswer"]["Args"]
+                type Result = $MethodTypes["postLangAnswer"]["Result"]
+            }
+            namespace postNugget {
+                type Args = $MethodTypes["postNugget"]["Args"]
+                type Result = $MethodTypes["postNugget"]["Result"]
             }
             namespace registerAgents {
                 type Args = $MethodTypes["registerAgents"]["Args"]

@@ -78,6 +78,9 @@ export class MatchRoom extends Actor<SocketMeta, ClientMsg, Outgoing> {
     @Persisted extraFeed: Record<string, FeedItem[]> = {}
     // Cached club ops inventory; stock lives here during the match so it survives restarts.
     @Persisted inventory: Record<string, InventoryItem> = {}
+    // Recent fan questions and each vote's language, for the crowd agent's mood notes.
+    @Persisted questions: Question[] = []
+    @Persisted voteLang: Record<string, FanLang> = {}
 
     // ---- Replay control ----
 
@@ -118,6 +121,8 @@ export class MatchRoom extends Actor<SocketMeta, ClientMsg, Outgoing> {
         this.orders = []
         this.personal = {}
         this.extraFeed = {}
+        this.questions = []
+        this.voteLang = {}
         // Hired agents are let go on reset so hiring can be shown again; the base team stays.
         this.roster = this.roster.filter(r => !r.hiredBy)
         await this.toAgents({ type: "reset" })
@@ -223,6 +228,31 @@ export class MatchRoom extends Actor<SocketMeta, ClientMsg, Outgoing> {
         return stock
     }
 
+    // ---- Initiative: crowd mood, explainers, stats nuggets ----
+
+    /** Per language: connected fans, recent questions and current votes. */
+    async getCrowd(windowMs = 60_000): Promise<Record<string, { fans: number; questions: string[]; votes: Record<string, number> }>> {
+        const out: Record<string, { fans: number; questions: string[]; votes: Record<string, number> }> = {}
+        const entry = (l: string) => (out[l] ??= { fans: 0, questions: [], votes: {} })
+        for (const s of await this.getConnections("fan")) entry(s.metadata.lang).fans++
+        for (const q of this.questions) if (q.ts > Date.now() - windowMs) entry(q.lang).questions.push(q.text)
+        for (const [user, player] of Object.entries(this.votes)) {
+            const v = entry(this.voteLang[user] ?? "en").votes
+            v[player] = (v[player] ?? 0) + 1
+        }
+        return out
+    }
+
+    /** A short explainer for every fan of one language (feed kind "answer"). */
+    async postLangAnswer(lang: FanLang, text: string): Promise<void> {
+        if (text) await this.pushFeed(lang, "answer", text)
+    }
+
+    /** A stats nugget for everyone: one line per covered language (English for the rest). */
+    async postNugget(lines: Record<string, string>): Promise<void> {
+        for (const lang of coveredLangs(this.roster)) if (lines[lang]) await this.pushFeed(lang, "commentary", lines[lang])
+    }
+
     // ---- Newsroom roster (live hiring) ----
 
     /** The agents process registers its base team on start; hired agents already on the roster stay. */
@@ -325,9 +355,11 @@ export class MatchRoom extends Actor<SocketMeta, ClientMsg, Outgoing> {
         const { userId, lang } = socket.metadata
         if (message.type === "vote" && typeof message.player === "string") {
             this.votes = { ...this.votes, [userId]: message.player.slice(0, 60) }
+            this.voteLang = { ...this.voteLang, [userId]: isFanLang(lang) ? lang : "en" }
             await this.sendStateToAll()
         } else if (message.type === "ask" && typeof message.text === "string" && message.text.trim()) {
             const question: Question = { id: crypto.randomUUID(), userId, lang, text: message.text.slice(0, 300), ts: Date.now() }
+            this.questions = [...this.questions, question].slice(-30)
             await this.toAgents({ type: "question", question })
         } else if (message.type === "buy") {
             if (!this.offer || this.offer.id !== message.offerId || this.offer.expiresAt < Date.now()) {
